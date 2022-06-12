@@ -1,6 +1,3 @@
-# Coming soon to a macOS Desktop near you....
-
-
 
 ## ZOIA Librarian for macOS
 
