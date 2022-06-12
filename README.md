@@ -47,9 +47,9 @@ This is a modern SwiftUI macOS native application. As such, it has some unfortun
 
 ## Documentation
 
-A user guide with tips & tricks is available here [User Guide](/docs/
+A user guide with tips & tricks is available here [User Guide](/docs/macOS%20UserGuide.md)
 
-Documentation of the ZOIA binary format as well as original testing and design documents for the original project from Empress Effects can be found in the [docs](/docs/macOS%20UserGuide.md) folder.
+Documentation of the ZOIA binary format as well as original testing and design documents for the original project from Empress Effects can be found in the docuements folder of the companion project here: https://github.com/meanmedianmoge/zoia_lib/tree/master/documentation
 
 ## Contributing
 We welcome all contributions! If you want to see something added, 
