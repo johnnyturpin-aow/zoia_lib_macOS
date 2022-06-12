@@ -9,7 +9,7 @@
 
 ![app screenshot](/docs/app-screenshot.png?raw=true)
 
-This is a native macOS patch manager / librarian for the Empress Effects ZOIA / Euroburo modular effects unit. It is written in Swift/SwiftUI which is currently (and unfortunately) not cross-platform. It is a "spiritual" fork / companion to the cross-platform (python/qt) ZOIA Librarian which can be found here: [https://github.com/meanmedianmoge/zoia_lib](https://github.com/meanmedianmoge/zoia_lib)
+This is a native macOS Patch Manager / Librarian for the Empress Effects ZOIA / Euroburo modular effects unit. It is written in Swift/SwiftUI which is currently (and unfortunately) not cross-platform. It is a "spiritual" fork / companion to the cross-platform (python/qt) ZOIA Librarian which can be found here: [https://github.com/meanmedianmoge/zoia_lib](https://github.com/meanmedianmoge/zoia_lib)
 
 There is no code shared between the two projects, though the original was invaluable in helping to figure out the ZOIA patch file format - we do share the common goal of making patch management for the ZOIA as easy as possible.
 
