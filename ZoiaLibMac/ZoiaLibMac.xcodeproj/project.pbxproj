@@ -1,0 +1,648 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		10043A9C28384C30007C891E /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10043A9B28384C30007C891E /* Constants.swift */; };
+		100AEFC3281E1C3A007FDAED /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 100AEFC2281E1C3A007FDAED /* YouTubePlayerKit */; };
+		100D2B26281A183600B5B778 /* SidebarNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100D2B25281A183600B5B778 /* SidebarNavigationView.swift */; };
+		1011A620281CA3C600A2BF93 /* CloudPatchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1011A61F281CA3C600A2BF93 /* CloudPatchDetailView.swift */; };
+		1011A622281CA44400A2BF93 /* TestPatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1011A621281CA44400A2BF93 /* TestPatch.swift */; };
+		1011A624281CCC4E00A2BF93 /* PatchButtonGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1011A623281CCC4E00A2BF93 /* PatchButtonGridView.swift */; };
+		1011A626281CE08000A2BF93 /* PatchPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1011A625281CE08000A2BF93 /* PatchPageView.swift */; };
+		1011A62A281E0D2700A2BF93 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1011A629281E0D2700A2BF93 /* SharedComponents.swift */; };
+		1011A62C281E17E900A2BF93 /* LibraryPatchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1011A62B281E17E900A2BF93 /* LibraryPatchDetailView.swift */; };
+		1012050228518A6A00A43FFF /* AppStateEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1012050128518A6A00A43FFF /* AppStateEnums.swift */; };
+		1017B04D284182290042A5CC /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017B04C284182290042A5CC /* Node.swift */; };
+		1017B050284182CC0042A5CC /* NodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017B04F284182CC0042A5CC /* NodeView.swift */; };
+		1017B05228419AC20042A5CC /* NodeCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017B05128419AC20042A5CC /* NodeCanvasView.swift */; };
+		1017B05428442E4B0042A5CC /* SelectionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017B05328442E4B0042A5CC /* SelectionHandler.swift */; };
+		1017B05628442F370042A5CC /* NodeCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017B05528442F370042A5CC /* NodeCanvas.swift */; };
+		101F425C281E587E0036165B /* EmpressReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101F425B281E587E0036165B /* EmpressReference.swift */; };
+		102EBDD3282DD7430034F23C /* BankPatchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102EBDD2282DD7430034F23C /* BankPatchDetailView.swift */; };
+		102EBDD528303C600034F23C /* BankHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102EBDD428303C600034F23C /* BankHeaderView.swift */; };
+		102EBDD72832E0480034F23C /* PatchDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102EBDD62832E0480034F23C /* PatchDownloader.swift */; };
+		1040161227ED471E000CB681 /* PatchStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1040161127ED471E000CB681 /* PatchStorage.swift */; };
+		1040161827F02815000CB681 /* PatchStorageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1040161727F02815000CB681 /* PatchStorageModels.swift */; };
+		104D181E28258E99002DF9F1 /* module_index_ordered.json in Resources */ = {isa = PBXBuildFile; fileRef = 104D181D28258E99002DF9F1 /* module_index_ordered.json */; };
+		10540BF5284C01B10029A6AE /* AppManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10540BF4284C01B10029A6AE /* AppManagers.swift */; };
+		105F100D281E4C080039F141 /* LibraryPatchViewList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F100C281E4C080039F141 /* LibraryPatchViewList.swift */; };
+		105F100F281E4E1D0039F141 /* LibraryPatchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F100E281E4E1D0039F141 /* LibraryPatchRow.swift */; };
+		1065A776282C77DB00B47479 /* BanksListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1065A775282C77DB00B47479 /* BanksListView.swift */; };
+		1065A778282C7A1800B47479 /* BanksManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1065A777282C7A1800B47479 /* BanksManager.swift */; };
+		1065A77A282C92EC00B47479 /* BankRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1065A779282C92EC00B47479 /* BankRowView.swift */; };
+		106753C527E7C42F00476AC3 /* ZoiaLibMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106753C427E7C42F00476AC3 /* ZoiaLibMacApp.swift */; };
+		106753C727E7C42F00476AC3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 106753C627E7C42F00476AC3 /* ContentView.swift */; };
+		106753C927E7C43000476AC3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 106753C827E7C43000476AC3 /* Assets.xcassets */; };
+		106753CC27E7C43000476AC3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 106753CB27E7C43000476AC3 /* Preview Assets.xcassets */; };
+		10789AD42834A83700FCB951 /* factory_list.json in Resources */ = {isa = PBXBuildFile; fileRef = 10789AD32834A83700FCB951 /* factory_list.json */; };
+		10789AD6283584C300FCB951 /* Bank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10789AD5283584C300FCB951 /* Bank.swift */; };
+		108281942835B8CD0017FE83 /* StaticPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108281932835B8CD0017FE83 /* StaticPreviewData.swift */; };
+		108281962835CCBC0017FE83 /* PatchIOView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108281952835CCBC0017FE83 /* PatchIOView.swift */; };
+		108AF9BC28456EC700A7BE92 /* NodeDistributionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108AF9BB28456EC700A7BE92 /* NodeDistributionView.swift */; };
+		109B2934280E1006000691BE /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109B2933280E1006000691BE /* AppViewModel.swift */; };
+		109B2937280E131B000691BE /* PatchBinary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109B2936280E131B000691BE /* PatchBinary.swift */; };
+		10A3AD8628498855001E9FEA /* EdgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A3AD8528498855001E9FEA /* EdgeView.swift */; };
+		10A3AD88284988E1001E9FEA /* Edge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A3AD87284988E1001E9FEA /* Edge.swift */; };
+		10A3AD8A284993AA001E9FEA /* EdgeDistributionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A3AD89284993AA001E9FEA /* EdgeDistributionView.swift */; };
+		10A3AD8C28499490001E9FEA /* DistributionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A3AD8B28499490001E9FEA /* DistributionView.swift */; };
+		10B13E212826C5D9006B4E5A /* ZoiaModuleProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B13E202826C5D9006B4E5A /* ZoiaModuleProcessor.swift */; };
+		10B5BA6E280769D4001B4203 /* CloudPatchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B5BA6D280769D4001B4203 /* CloudPatchRow.swift */; };
+		10B5BA7128077C37001B4203 /* CachedAsyncImage in Frameworks */ = {isa = PBXBuildFile; productRef = 10B5BA7028077C37001B4203 /* CachedAsyncImage */; };
+		10BD3E8A2839992600BCECD3 /* AppButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BD3E892839992600BCECD3 /* AppButtons.swift */; };
+		10CA7D322839D12500460B85 /* _zoia_.bin in Resources */ = {isa = PBXBuildFile; fileRef = 10CA7D312839D12500460B85 /* _zoia_.bin */; };
+		10CA7D342839D13900460B85 /* Factory in Resources */ = {isa = PBXBuildFile; fileRef = 10CA7D332839D13900460B85 /* Factory */; };
+		10D900CA2804A3BA0070B116 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 10D900C92804A3B90070B116 /* WrappingHStack */; };
+		10D900CE2804FC700070B116 /* CloudPatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D900CD2804FC700070B116 /* CloudPatchListView.swift */; };
+		10E7FFE22817813000E6E017 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E7FFE12817813000E6E017 /* Utils.swift */; };
+		10F8BA2D285561DD005BD8E7 /* ZoiaBundleFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F8BA2C285561DD005BD8E7 /* ZoiaBundleFile.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		10043A9B28384C30007C891E /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		100D2B25281A183600B5B778 /* SidebarNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarNavigationView.swift; sourceTree = "<group>"; };
+		1011A61F281CA3C600A2BF93 /* CloudPatchDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudPatchDetailView.swift; sourceTree = "<group>"; };
+		1011A621281CA44400A2BF93 /* TestPatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPatch.swift; sourceTree = "<group>"; };
+		1011A623281CCC4E00A2BF93 /* PatchButtonGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchButtonGridView.swift; sourceTree = "<group>"; };
+		1011A625281CE08000A2BF93 /* PatchPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchPageView.swift; sourceTree = "<group>"; };
+		1011A629281E0D2700A2BF93 /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
+		1011A62B281E17E900A2BF93 /* LibraryPatchDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryPatchDetailView.swift; sourceTree = "<group>"; };
+		1012050128518A6A00A43FFF /* AppStateEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateEnums.swift; sourceTree = "<group>"; };
+		1017B04C284182290042A5CC /* Node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
+		1017B04F284182CC0042A5CC /* NodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeView.swift; sourceTree = "<group>"; };
+		1017B05128419AC20042A5CC /* NodeCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeCanvasView.swift; sourceTree = "<group>"; };
+		1017B05328442E4B0042A5CC /* SelectionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionHandler.swift; sourceTree = "<group>"; };
+		1017B05528442F370042A5CC /* NodeCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeCanvas.swift; sourceTree = "<group>"; };
+		101F425B281E587E0036165B /* EmpressReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmpressReference.swift; sourceTree = "<group>"; };
+		102EBDD2282DD7430034F23C /* BankPatchDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankPatchDetailView.swift; sourceTree = "<group>"; };
+		102EBDD428303C600034F23C /* BankHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankHeaderView.swift; sourceTree = "<group>"; };
+		102EBDD62832E0480034F23C /* PatchDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchDownloader.swift; sourceTree = "<group>"; };
+		1040161127ED471E000CB681 /* PatchStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchStorage.swift; sourceTree = "<group>"; };
+		1040161527EEB373000CB681 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1040161727F02815000CB681 /* PatchStorageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchStorageModels.swift; sourceTree = "<group>"; };
+		104D181D28258E99002DF9F1 /* module_index_ordered.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = module_index_ordered.json; sourceTree = "<group>"; };
+		10540BF4284C01B10029A6AE /* AppManagers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppManagers.swift; sourceTree = "<group>"; };
+		105F100C281E4C080039F141 /* LibraryPatchViewList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryPatchViewList.swift; sourceTree = "<group>"; };
+		105F100E281E4E1D0039F141 /* LibraryPatchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryPatchRow.swift; sourceTree = "<group>"; };
+		1065A775282C77DB00B47479 /* BanksListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BanksListView.swift; sourceTree = "<group>"; };
+		1065A777282C7A1800B47479 /* BanksManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BanksManager.swift; sourceTree = "<group>"; };
+		1065A779282C92EC00B47479 /* BankRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankRowView.swift; sourceTree = "<group>"; };
+		106753C127E7C42F00476AC3 /* ZLIB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZLIB.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		106753C427E7C42F00476AC3 /* ZoiaLibMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoiaLibMacApp.swift; sourceTree = "<group>"; };
+		106753C627E7C42F00476AC3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		106753C827E7C43000476AC3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		106753CB27E7C43000476AC3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		106753CD27E7C43000476AC3 /* ZoiaLibMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZoiaLibMac.entitlements; sourceTree = "<group>"; };
+		10789AD32834A83700FCB951 /* factory_list.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = factory_list.json; sourceTree = "<group>"; };
+		10789AD5283584C300FCB951 /* Bank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bank.swift; sourceTree = "<group>"; };
+		108281932835B8CD0017FE83 /* StaticPreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticPreviewData.swift; sourceTree = "<group>"; };
+		108281952835CCBC0017FE83 /* PatchIOView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchIOView.swift; sourceTree = "<group>"; };
+		108AF9BB28456EC700A7BE92 /* NodeDistributionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeDistributionView.swift; sourceTree = "<group>"; };
+		109B2933280E1006000691BE /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		109B2936280E131B000691BE /* PatchBinary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchBinary.swift; sourceTree = "<group>"; };
+		10A3AD8528498855001E9FEA /* EdgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeView.swift; sourceTree = "<group>"; };
+		10A3AD87284988E1001E9FEA /* Edge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Edge.swift; sourceTree = "<group>"; };
+		10A3AD89284993AA001E9FEA /* EdgeDistributionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeDistributionView.swift; sourceTree = "<group>"; };
+		10A3AD8B28499490001E9FEA /* DistributionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributionView.swift; sourceTree = "<group>"; };
+		10B13E202826C5D9006B4E5A /* ZoiaModuleProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoiaModuleProcessor.swift; sourceTree = "<group>"; };
+		10B5BA6D280769D4001B4203 /* CloudPatchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudPatchRow.swift; sourceTree = "<group>"; };
+		10BD3E892839992600BCECD3 /* AppButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppButtons.swift; sourceTree = "<group>"; };
+		10CA7D312839D12500460B85 /* _zoia_.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = _zoia_.bin; sourceTree = "<group>"; };
+		10CA7D332839D13900460B85 /* Factory */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Factory; sourceTree = "<group>"; };
+		10D900CD2804FC700070B116 /* CloudPatchListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudPatchListView.swift; sourceTree = "<group>"; };
+		10E7FFE12817813000E6E017 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		10F8BA2C285561DD005BD8E7 /* ZoiaBundleFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoiaBundleFile.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		106753BE27E7C42F00476AC3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10B5BA7128077C37001B4203 /* CachedAsyncImage in Frameworks */,
+				10D900CA2804A3BA0070B116 /* WrappingHStack in Frameworks */,
+				100AEFC3281E1C3A007FDAED /* YouTubePlayerKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1017B04E284182B60042A5CC /* Nodes */ = {
+			isa = PBXGroup;
+			children = (
+				1017B04C284182290042A5CC /* Node.swift */,
+				10A3AD87284988E1001E9FEA /* Edge.swift */,
+				1017B04F284182CC0042A5CC /* NodeView.swift */,
+				10A3AD8528498855001E9FEA /* EdgeView.swift */,
+				1017B05528442F370042A5CC /* NodeCanvas.swift */,
+				1017B05128419AC20042A5CC /* NodeCanvasView.swift */,
+				10A3AD8B28499490001E9FEA /* DistributionView.swift */,
+				108AF9BB28456EC700A7BE92 /* NodeDistributionView.swift */,
+				10A3AD89284993AA001E9FEA /* EdgeDistributionView.swift */,
+				1017B05328442E4B0042A5CC /* SelectionHandler.swift */,
+				10F8BA2C285561DD005BD8E7 /* ZoiaBundleFile.swift */,
+			);
+			path = Nodes;
+			sourceTree = "<group>";
+		};
+		10565E1727FC09B200E5A983 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				106753C627E7C42F00476AC3 /* ContentView.swift */,
+				100D2B25281A183600B5B778 /* SidebarNavigationView.swift */,
+				1011A629281E0D2700A2BF93 /* SharedComponents.swift */,
+				1065A775282C77DB00B47479 /* BanksListView.swift */,
+				1065A779282C92EC00B47479 /* BankRowView.swift */,
+				102EBDD428303C600034F23C /* BankHeaderView.swift */,
+				1065A773282B2E1C00B47479 /* CloudViews */,
+				1065A774282B2E4000B47479 /* LibraryViews */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		105F1010281E564A0039F141 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				10CA7D332839D13900460B85 /* Factory */,
+				10CA7D312839D12500460B85 /* _zoia_.bin */,
+				10789AD32834A83700FCB951 /* factory_list.json */,
+				104D181D28258E99002DF9F1 /* module_index_ordered.json */,
+				106753C827E7C43000476AC3 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		105F1011281E56540039F141 /* Global */ = {
+			isa = PBXGroup;
+			children = (
+				106753C427E7C42F00476AC3 /* ZoiaLibMacApp.swift */,
+				109B2933280E1006000691BE /* AppViewModel.swift */,
+				10540BF4284C01B10029A6AE /* AppManagers.swift */,
+				10BD3E892839992600BCECD3 /* AppButtons.swift */,
+				10E7FFE12817813000E6E017 /* Utils.swift */,
+				10043A9B28384C30007C891E /* Constants.swift */,
+				1012050128518A6A00A43FFF /* AppStateEnums.swift */,
+			);
+			path = Global;
+			sourceTree = "<group>";
+		};
+		1065A773282B2E1C00B47479 /* CloudViews */ = {
+			isa = PBXGroup;
+			children = (
+				10D900CD2804FC700070B116 /* CloudPatchListView.swift */,
+				10B5BA6D280769D4001B4203 /* CloudPatchRow.swift */,
+				1011A61F281CA3C600A2BF93 /* CloudPatchDetailView.swift */,
+			);
+			path = CloudViews;
+			sourceTree = "<group>";
+		};
+		1065A774282B2E4000B47479 /* LibraryViews */ = {
+			isa = PBXGroup;
+			children = (
+				105F100C281E4C080039F141 /* LibraryPatchViewList.swift */,
+				105F100E281E4E1D0039F141 /* LibraryPatchRow.swift */,
+				1011A62B281E17E900A2BF93 /* LibraryPatchDetailView.swift */,
+				102EBDD2282DD7430034F23C /* BankPatchDetailView.swift */,
+				1011A625281CE08000A2BF93 /* PatchPageView.swift */,
+				1011A623281CCC4E00A2BF93 /* PatchButtonGridView.swift */,
+				108281952835CCBC0017FE83 /* PatchIOView.swift */,
+			);
+			path = LibraryViews;
+			sourceTree = "<group>";
+		};
+		106753B827E7C42F00476AC3 = {
+			isa = PBXGroup;
+			children = (
+				106753C327E7C42F00476AC3 /* ZoiaLibMac */,
+				106753C227E7C42F00476AC3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		106753C227E7C42F00476AC3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				106753C127E7C42F00476AC3 /* ZLIB.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		106753C327E7C42F00476AC3 /* ZoiaLibMac */ = {
+			isa = PBXGroup;
+			children = (
+				1040161527EEB373000CB681 /* Info.plist */,
+				105F1011281E56540039F141 /* Global */,
+				10565E1727FC09B200E5A983 /* Views */,
+				105F1010281E564A0039F141 /* Resources */,
+				106753CD27E7C43000476AC3 /* ZoiaLibMac.entitlements */,
+				106753CA27E7C43000476AC3 /* Preview Content */,
+				10D900CF2805D10C0070B116 /* API */,
+				1017B04E284182B60042A5CC /* Nodes */,
+			);
+			path = ZoiaLibMac;
+			sourceTree = "<group>";
+		};
+		106753CA27E7C43000476AC3 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				106753CB27E7C43000476AC3 /* Preview Assets.xcassets */,
+				1011A621281CA44400A2BF93 /* TestPatch.swift */,
+				108281932835B8CD0017FE83 /* StaticPreviewData.swift */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		10D900CF2805D10C0070B116 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				1065A777282C7A1800B47479 /* BanksManager.swift */,
+				10789AD5283584C300FCB951 /* Bank.swift */,
+				109B2936280E131B000691BE /* PatchBinary.swift */,
+				102EBDD62832E0480034F23C /* PatchDownloader.swift */,
+				10B13E202826C5D9006B4E5A /* ZoiaModuleProcessor.swift */,
+				1040161127ED471E000CB681 /* PatchStorage.swift */,
+				1040161727F02815000CB681 /* PatchStorageModels.swift */,
+				101F425B281E587E0036165B /* EmpressReference.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		106753C027E7C42F00476AC3 /* ZLIB */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 106753D027E7C43000476AC3 /* Build configuration list for PBXNativeTarget "ZLIB" */;
+			buildPhases = (
+				106753BD27E7C42F00476AC3 /* Sources */,
+				106753BE27E7C42F00476AC3 /* Frameworks */,
+				106753BF27E7C42F00476AC3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ZLIB;
+			packageProductDependencies = (
+				10D900C92804A3B90070B116 /* WrappingHStack */,
+				10B5BA7028077C37001B4203 /* CachedAsyncImage */,
+				100AEFC2281E1C3A007FDAED /* YouTubePlayerKit */,
+			);
+			productName = ZoiaLibMac;
+			productReference = 106753C127E7C42F00476AC3 /* ZLIB.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		106753B927E7C42F00476AC3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1330;
+				LastUpgradeCheck = 1330;
+				TargetAttributes = {
+					106753C027E7C42F00476AC3 = {
+						CreatedOnToolsVersion = 13.3;
+					};
+				};
+			};
+			buildConfigurationList = 106753BC27E7C42F00476AC3 /* Build configuration list for PBXProject "ZoiaLibMac" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 106753B827E7C42F00476AC3;
+			packageReferences = (
+				10D900C82804A3B90070B116 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
+				10B5BA6F28077C37001B4203 /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
+				100AEFC1281E1C3A007FDAED /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */,
+			);
+			productRefGroup = 106753C227E7C42F00476AC3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				106753C027E7C42F00476AC3 /* ZLIB */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		106753BF27E7C42F00476AC3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10CA7D322839D12500460B85 /* _zoia_.bin in Resources */,
+				106753CC27E7C43000476AC3 /* Preview Assets.xcassets in Resources */,
+				10789AD42834A83700FCB951 /* factory_list.json in Resources */,
+				10CA7D342839D13900460B85 /* Factory in Resources */,
+				104D181E28258E99002DF9F1 /* module_index_ordered.json in Resources */,
+				106753C927E7C43000476AC3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		106753BD27E7C42F00476AC3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1040161827F02815000CB681 /* PatchStorageModels.swift in Sources */,
+				106753C727E7C42F00476AC3 /* ContentView.swift in Sources */,
+				1011A626281CE08000A2BF93 /* PatchPageView.swift in Sources */,
+				1017B04D284182290042A5CC /* Node.swift in Sources */,
+				1017B05228419AC20042A5CC /* NodeCanvasView.swift in Sources */,
+				1065A776282C77DB00B47479 /* BanksListView.swift in Sources */,
+				105F100D281E4C080039F141 /* LibraryPatchViewList.swift in Sources */,
+				10A3AD8C28499490001E9FEA /* DistributionView.swift in Sources */,
+				1011A624281CCC4E00A2BF93 /* PatchButtonGridView.swift in Sources */,
+				1011A62A281E0D2700A2BF93 /* SharedComponents.swift in Sources */,
+				1065A77A282C92EC00B47479 /* BankRowView.swift in Sources */,
+				108281942835B8CD0017FE83 /* StaticPreviewData.swift in Sources */,
+				10043A9C28384C30007C891E /* Constants.swift in Sources */,
+				100D2B26281A183600B5B778 /* SidebarNavigationView.swift in Sources */,
+				1017B05428442E4B0042A5CC /* SelectionHandler.swift in Sources */,
+				109B2934280E1006000691BE /* AppViewModel.swift in Sources */,
+				108AF9BC28456EC700A7BE92 /* NodeDistributionView.swift in Sources */,
+				105F100F281E4E1D0039F141 /* LibraryPatchRow.swift in Sources */,
+				102EBDD528303C600034F23C /* BankHeaderView.swift in Sources */,
+				10F8BA2D285561DD005BD8E7 /* ZoiaBundleFile.swift in Sources */,
+				10A3AD88284988E1001E9FEA /* Edge.swift in Sources */,
+				10E7FFE22817813000E6E017 /* Utils.swift in Sources */,
+				109B2937280E131B000691BE /* PatchBinary.swift in Sources */,
+				1011A62C281E17E900A2BF93 /* LibraryPatchDetailView.swift in Sources */,
+				10A3AD8628498855001E9FEA /* EdgeView.swift in Sources */,
+				102EBDD72832E0480034F23C /* PatchDownloader.swift in Sources */,
+				1012050228518A6A00A43FFF /* AppStateEnums.swift in Sources */,
+				1040161227ED471E000CB681 /* PatchStorage.swift in Sources */,
+				1017B050284182CC0042A5CC /* NodeView.swift in Sources */,
+				108281962835CCBC0017FE83 /* PatchIOView.swift in Sources */,
+				10540BF5284C01B10029A6AE /* AppManagers.swift in Sources */,
+				1011A622281CA44400A2BF93 /* TestPatch.swift in Sources */,
+				106753C527E7C42F00476AC3 /* ZoiaLibMacApp.swift in Sources */,
+				10B13E212826C5D9006B4E5A /* ZoiaModuleProcessor.swift in Sources */,
+				1017B05628442F370042A5CC /* NodeCanvas.swift in Sources */,
+				10789AD6283584C300FCB951 /* Bank.swift in Sources */,
+				10D900CE2804FC700070B116 /* CloudPatchListView.swift in Sources */,
+				101F425C281E587E0036165B /* EmpressReference.swift in Sources */,
+				10BD3E8A2839992600BCECD3 /* AppButtons.swift in Sources */,
+				10B5BA6E280769D4001B4203 /* CloudPatchRow.swift in Sources */,
+				1011A620281CA3C600A2BF93 /* CloudPatchDetailView.swift in Sources */,
+				1065A778282C7A1800B47479 /* BanksManager.swift in Sources */,
+				10A3AD8A284993AA001E9FEA /* EdgeDistributionView.swift in Sources */,
+				102EBDD3282DD7430034F23C /* BankPatchDetailView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		106753CE27E7C43000476AC3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		106753CF27E7C43000476AC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		106753D127E7C43000476AC3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = ZoiaLibMac/ZoiaLibMac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 510;
+				DEVELOPMENT_ASSET_PATHS = "\"ZoiaLibMac/Preview Content\"";
+				DEVELOPMENT_TEAM = WX8ZVWJE3D;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZoiaLibMac/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.polymorphicranch.zoia-lib-mac";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		106753D227E7C43000476AC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = ZoiaLibMac/ZoiaLibMac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 510;
+				DEVELOPMENT_ASSET_PATHS = "\"ZoiaLibMac/Preview Content\"";
+				DEVELOPMENT_TEAM = WX8ZVWJE3D;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZoiaLibMac/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.polymorphicranch.zoia-lib-mac";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		106753BC27E7C42F00476AC3 /* Build configuration list for PBXProject "ZoiaLibMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				106753CE27E7C43000476AC3 /* Debug */,
+				106753CF27E7C43000476AC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		106753D027E7C43000476AC3 /* Build configuration list for PBXNativeTarget "ZLIB" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				106753D127E7C43000476AC3 /* Debug */,
+				106753D227E7C43000476AC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		100AEFC1281E1C3A007FDAED /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SvenTiigi/YouTubePlayerKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		10B5BA6F28077C37001B4203 /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lorenzofiamingo/swiftui-cached-async-image";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		10D900C82804A3B90070B116 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dkk/WrappingHStack";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		100AEFC2281E1C3A007FDAED /* YouTubePlayerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100AEFC1281E1C3A007FDAED /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
+			productName = YouTubePlayerKit;
+		};
+		10B5BA7028077C37001B4203 /* CachedAsyncImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 10B5BA6F28077C37001B4203 /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */;
+			productName = CachedAsyncImage;
+		};
+		10D900C92804A3B90070B116 /* WrappingHStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 10D900C82804A3B90070B116 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
+			productName = WrappingHStack;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 106753B927E7C42F00476AC3 /* Project object */;
+}
