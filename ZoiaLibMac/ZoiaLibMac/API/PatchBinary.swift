@@ -515,9 +515,6 @@ struct ParsedBinaryPatch: Identifiable {
         
         var conns: [BlockConnection] = []
         
-        if patch.name.contains("baths") {
-            print("check here")
-        }
         // pass 2 - loop through again creating indexed based connections
         for (_, connection) in patch.connections.enumerated() {
             guard let source_module_idx = connection.source.item(at: 0) else { continue }
@@ -577,11 +574,6 @@ struct ParsedBinaryPatch: Identifiable {
                 let newName = (dest_module?.name == nil || dest_module?.name?.isEmpty == true) ? dest_module?.refName : dest_module?.name
                 dest_module?.name = newName
                 updatedModules[dest_module_idx] = dest_module!
-            }
-            
-            if patch.name.contains("bath") {
-                print("\(source_module?.name ?? "").\(source_block?.keys.first ?? "") > \(connection.strength)% > \(dest_module?.name ?? "").\(dest_block?.keys.first ?? "")")
-
             }
         }
         

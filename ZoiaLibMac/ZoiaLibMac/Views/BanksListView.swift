@@ -72,6 +72,7 @@ struct BanksListView: View {
         VStack(alignment: .leading) {
             BankHeaderView(bank: bank)
                 .frame(height: 150)
+                .bankDropTarget(bank: bank)
             List {
 
                 ForEach(bank.orderedPatches.indices) {
@@ -101,6 +102,7 @@ struct BanksListView: View {
             }
             .padding(0)
             .listStyle(.inset(alternatesRowBackgrounds: true))
+            .bankDropTarget(bank: bank)
         }
     }
     
@@ -124,6 +126,7 @@ struct BanksListView: View {
         for index in offsets {
             if bank.orderedPatches.item(at: index)?.patchType == .empty { continue }
             bank.deletePatch(at: index)
+            model.selectedBinaryPatchId = nil
         }
     }
 }

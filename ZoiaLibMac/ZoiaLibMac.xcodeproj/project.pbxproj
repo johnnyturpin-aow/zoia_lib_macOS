@@ -58,6 +58,7 @@
 		10CA7D342839D13900460B85 /* Factory in Resources */ = {isa = PBXBuildFile; fileRef = 10CA7D332839D13900460B85 /* Factory */; };
 		10D900CA2804A3BA0070B116 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 10D900C92804A3B90070B116 /* WrappingHStack */; };
 		10D900CE2804FC700070B116 /* CloudPatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D900CD2804FC700070B116 /* CloudPatchListView.swift */; };
+		10E5E4D2285D942B007EF96B /* DraggableModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E5E4D1285D942B007EF96B /* DraggableModifiers.swift */; };
 		10E7FFE22817813000E6E017 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E7FFE12817813000E6E017 /* Utils.swift */; };
 		10F8BA2D285561DD005BD8E7 /* ZoiaBundleFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F8BA2C285561DD005BD8E7 /* ZoiaBundleFile.swift */; };
 /* End PBXBuildFile section */
@@ -114,6 +115,7 @@
 		10CA7D312839D12500460B85 /* _zoia_.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = _zoia_.bin; sourceTree = "<group>"; };
 		10CA7D332839D13900460B85 /* Factory */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Factory; sourceTree = "<group>"; };
 		10D900CD2804FC700070B116 /* CloudPatchListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudPatchListView.swift; sourceTree = "<group>"; };
+		10E5E4D1285D942B007EF96B /* DraggableModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggableModifiers.swift; sourceTree = "<group>"; };
 		10E7FFE12817813000E6E017 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		10F8BA2C285561DD005BD8E7 /* ZoiaBundleFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoiaBundleFile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -187,6 +189,7 @@
 				10E7FFE12817813000E6E017 /* Utils.swift */,
 				10043A9B28384C30007C891E /* Constants.swift */,
 				1012050128518A6A00A43FFF /* AppStateEnums.swift */,
+				10E5E4D1285D942B007EF96B /* DraggableModifiers.swift */,
 			);
 			path = Global;
 			sourceTree = "<group>";
@@ -365,6 +368,7 @@
 				10A3AD8C28499490001E9FEA /* DistributionView.swift in Sources */,
 				1011A624281CCC4E00A2BF93 /* PatchButtonGridView.swift in Sources */,
 				1011A62A281E0D2700A2BF93 /* SharedComponents.swift in Sources */,
+				10E5E4D2285D942B007EF96B /* DraggableModifiers.swift in Sources */,
 				1065A77A282C92EC00B47479 /* BankRowView.swift in Sources */,
 				108281942835B8CD0017FE83 /* StaticPreviewData.swift in Sources */,
 				10043A9C28384C30007C891E /* Constants.swift in Sources */,
@@ -527,7 +531,7 @@
 				CODE_SIGN_ENTITLEMENTS = ZoiaLibMac/ZoiaLibMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 510;
+				CURRENT_PROJECT_VERSION = 606;
 				DEVELOPMENT_ASSET_PATHS = "\"ZoiaLibMac/Preview Content\"";
 				DEVELOPMENT_TEAM = WX8ZVWJE3D;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -556,7 +560,7 @@
 				CODE_SIGN_ENTITLEMENTS = ZoiaLibMac/ZoiaLibMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 510;
+				CURRENT_PROJECT_VERSION = 606;
 				DEVELOPMENT_ASSET_PATHS = "\"ZoiaLibMac/Preview Content\"";
 				DEVELOPMENT_TEAM = WX8ZVWJE3D;
 				ENABLE_HARDENED_RUNTIME = YES;

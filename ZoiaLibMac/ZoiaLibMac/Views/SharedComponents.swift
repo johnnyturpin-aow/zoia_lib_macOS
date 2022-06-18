@@ -8,37 +8,7 @@ import SwiftUI
 import CachedAsyncImage
 import WrappingHStack
 
-struct DraggablePatch: ViewModifier {
-    let patch: PatchFile
-    func body(content: Content) -> some View {
-        if patch.patchType == .empty {
-            content
-        } else {
-            content
-                .onDrag {
-                    var patchPath: URL?
-                    switch patch.patchType {
-                    case .user(let filePath):
-                        patchPath = URL(fileURLWithPath: filePath)
-                    default:
-                        break
-                    }
-                    
-                    if let path = patchPath {
-                        return NSItemProvider(item: path as NSURL, typeIdentifier: "public.file-url")
-                    } else {
-                        return NSItemProvider(item: URL(fileURLWithPath: "") as NSURL, typeIdentifier: "public.file-url")
-                    }
-                }
-        }
-    }
-}
 
-extension View {
-    func draggablePatch(patch: PatchFile) -> some View {
-        modifier(DraggablePatch(patch: patch))
-    }
-}
 
 struct PatchImageView: View {
     

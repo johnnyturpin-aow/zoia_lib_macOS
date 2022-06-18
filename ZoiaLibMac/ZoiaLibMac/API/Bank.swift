@@ -76,19 +76,21 @@ class Bank: Identifiable, Hashable, ObservableObject {
         
     }
     
-    func insertComboDirectoryAsPatch(directoryUrl: URL) {
+    func insertComboDirectoryAsPatch(directoryUrl: URL, completion: ((Bool)->Void)? = nil) {
         DispatchQueue.global(qos: .background).async {
             do {
                 let allFiles = try FileManager.default.contentsOfDirectory(at: directoryUrl, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
                     
                 guard let patchFile = allFiles.first(where:  { $0.pathExtension.lowercased().contains("bin") }) else {
                     print("could not find .bin file in combo directory")
+                    completion?(false)
                     return
                 }
-                BankManager.insertBinFileAsPatch(bank: self, fileUrl: patchFile)
+                BankManager.insertBinFileAsPatch(bank: self, fileUrl: patchFile, completion: completion)
                 
             } catch {
                 print("error parsing combo directory")
+                completion?(false)
             }
         }
     }
