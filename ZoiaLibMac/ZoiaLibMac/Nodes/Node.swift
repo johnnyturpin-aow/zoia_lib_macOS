@@ -31,10 +31,18 @@ class Node: ObservableObject, Identifiable, Equatable {
     var outputs: [Port] = []
     var colorId: Int = 1
     var mod_idx: Int
+    
     var color: Color {
         //return Color("Color-11")
         let colorName = "Color-" + colorId.description
         return Color.init(colorName)
+    }
+    
+    var nodeLabelColor: Color {
+        switch self.colorId {
+        case 1, 2, 3, 6, 8, 11, 12, 13, 16: return Color.white
+        default: return Color.black
+        }
     }
 
     var height: CGFloat {

@@ -175,6 +175,9 @@ class NodeCanvas: ObservableObject {
             
             let srcConnection = NodeConnection(node: srcNode, port: srcPort)
             let endConnection = NodeConnection(node: dstNode, port: dstPort)
+            
+            _ = srcPort.connectTo(dstPort)
+            _ = dstPort.connectTo(srcPort)
             let edge = Edge(start: srcConnection, end: endConnection, strength: 100)
             self.edges.append(edge)
         }

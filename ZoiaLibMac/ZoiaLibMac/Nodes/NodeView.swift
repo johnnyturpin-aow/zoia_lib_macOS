@@ -49,7 +49,7 @@ struct NodeView: View {
             
             Text(node.name)
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(Color.white)
+                .foregroundColor(node.nodeLabelColor)
                 .frame(width: NodeView.nodeWidth, height: NodeView.titleHeight, alignment: .center)
                 .offset(x: 0, y: 4)
             
@@ -113,10 +113,10 @@ struct InputPortView: View {
     var body: some View {
         HStack {
             Circle()
-                .fill(Color("TagModulation"))
+                .fill( port.connection == nil ? Color("Color-16") : Color("Color-11"))
                 .frame(width: NodeView.portDiameter, height: NodeView.portDiameter)
                 .overlay(Circle()
-                    .stroke(Color.green, lineWidth: 3))
+                    .stroke( port.connection == nil ? Color(red: 0.8, green: 0.8, blue: 0.8) : Color("Color-5"), lineWidth: 3))
                 .padding(port.connection == nil ? 0 : -4)
                 .overlay(Circle()
                     .fill(port.connection == nil ? .clear : .white))
@@ -141,10 +141,10 @@ struct OutputPortView: View {
                 .font(.system(size: 11, weight: .regular))
                 .foregroundColor(Color.white)
             Circle()
-                .fill(Color("TagModulation"))
+                .fill( port.connection == nil ? Color("Color-16") : Color("Color-11"))
                 .frame(width: NodeView.portDiameter, height: NodeView.portDiameter)
                 .overlay(Circle()
-                    .stroke(Color.green, lineWidth: 3))
+                    .stroke( port.connection == nil ? Color(red: 0.8, green: 0.8, blue: 0.8) : Color("Color-5"), lineWidth: 3))
                 .padding(port.connection == nil ? 0 : -4)
                 .overlay(Circle()
                     .fill(port.connection == nil ? .clear : .white))
