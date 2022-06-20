@@ -39,8 +39,8 @@ struct PatchIOView: View {
                 }
                 
             }
-            .padding(.leading, 20)
-            .frame(width: 120)
+            .padding(.leading, 10)
+            .frame(width: 110)
             VStack(alignment: .leading) {
                 HStack {
                     
@@ -75,7 +75,7 @@ struct PatchIOView: View {
                 }
                 
             }
-            .frame(width: 150)
+            .frame(width: 140)
             VStack(alignment: .leading) {
                 HStack {
                     
@@ -123,7 +123,7 @@ struct PatchIOView: View {
                 }
             }
             .opacity(patch_io.has_cv ? 1.0 : 0.3)
-            .frame(width: 200)
+            .frame(width: 210)
             VStack(alignment: .center) {
                 Text("Stomp")
                     .font(.system(size: 12, weight: .regular))
@@ -144,7 +144,33 @@ struct PatchIOView: View {
                 }
             }
             .opacity(patch_io.has_stomp ? 1.0 : 0.3)
-            .frame(width: 160)
+            .frame(width: 130)
+            VStack(alignment: .leading) {
+                HStack {
+                    Image(systemName: "circle.hexagongrid.circle")
+                        .font(.system(size: 20.0))
+                        .foregroundColor(patch_io.has_midi_in == true ? AppColors.ioActivated : AppColors.ioNormal)
+                        .padding(.bottom, 2)
+                    Text(patch_io.midi_input_description)
+                        .font(.system(size: 9, weight: .regular))
+                        .foregroundColor(AppColors.ioNormal)
+                        .frame(width: 75, alignment: .leading)
+                }
+                .opacity(patch_io.has_midi_in ? 1.0 : 0.3)
+                HStack {
+                    Image(systemName: "circle.hexagongrid.circle.fill")
+                        .font(.system(size: 20.0))
+                        .foregroundColor(patch_io.has_midi_out == true ? AppColors.ioActivated : AppColors.ioNormal)
+                        .padding(.bottom, 2)
+                    Text(patch_io.midi_output_description)
+                        .font(.system(size: 9, weight: .regular))
+                        .foregroundColor(AppColors.ioNormal)
+                        .frame(width: 75, alignment: .leading)
+                }
+                .opacity(patch_io.has_midi_out ? 1.0 : 0.3)
+            }
+            
+            .frame(width: 150)
             Spacer()
         }
     }

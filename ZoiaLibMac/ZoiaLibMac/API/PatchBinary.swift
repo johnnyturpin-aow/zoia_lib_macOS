@@ -252,15 +252,62 @@ struct ParsedBinaryPatch: Identifiable {
         var audio_ouput_str: String {
             return ""
         }
+        
+
         var audio_output_list: [Int: Bool] =  [1:false, 2:false]
         var audio_input_list: [Int: Bool] = [1:false, 2:false]
+        
+        // MIDI IN Mapping:     1 = MIDI notes IN,  2 = MIDI clock IN,  3 = MIDI CC IN,     4 = MIDI Pressure IN, 5 = MIDI PitchBend IN
+        // MIDI OUT Mapping:    1 = MIDI notes OUT, 2 = MIDI clock OUT, 3 = MIDI CC OUT,    4 = MIDI PC OUT
+        var midi_input_list: [Int: Bool] = [1:false, 2:false, 3:false, 4:false, 5:false]
+        var midi_output_list: [Int: Bool] = [1:false, 2:false, 3:false, 4:false]
         var stomp_switch: [Int: Bool] = [1:false, 2:false, 3:false]
         var cv_in: [Int: Bool] = [1:false, 2:false, 3:false, 4:false]
         var cv_out: [Int: Bool] = [1:false, 2:false, 3:false, 4:false]
         var has_cv = false
         var has_stomp = false
         var has_headphone = false
+        var has_midi_in: Bool {
+            for (_,val) in midi_input_list {
+                if val == true { return true }
+            }
+            return false
+        }
+        var has_midi_out: Bool {
+            for (_,val) in midi_output_list {
+                if val == true { return true }
+            }
+            return false
+        }
         var estimated_cpu: String = ""
+        
+        var midi_input_description: String {
+            var items: [String] = []
+            if self.midi_input_list[1] == true { items.append("NOTE") }
+            if self.midi_input_list[2] == true { items.append("CLK") }
+            if self.midi_input_list[3] == true { items.append("CC") }
+            if self.midi_input_list[4] == true { items.append("PRS") }
+            if self.midi_input_list[5] == true { items.append("PB") }
+            
+            if items.isEmpty {
+                return "NO MIDI IN"
+            } else {
+                return items.joined(separator: ", ")
+            }
+            
+        }
+        var midi_output_description: String {
+            var items: [String] = []
+            if self.midi_output_list[1] == true { items.append("NOTE") }
+            if self.midi_output_list[2] == true { items.append("CLK") }
+            if self.midi_output_list[3] == true { items.append("CC") }
+            if self.midi_output_list[4] == true { items.append("PC") }
+            if items.isEmpty {
+                return "NO MIDI OUT"
+            } else {
+                return items.joined(separator: ", ")
+            }
+        }
     }
     
     static let color_mapping: [Int: String] = [1:"blue", 2:"green", 3:"red", 4:"yellow", 5:"aqua", 6:"magenta", 7:"white", 8:"orange", 9:"lima", 10:"surf", 11:"sky", 12:"purple", 13:"pink", 14:"peach", 15: "mango"]
@@ -340,6 +387,10 @@ struct ParsedBinaryPatch: Identifiable {
             let name_range = name_start_index..<name_end_index
             module.name = ParsedBinaryPatch.parseNullTerminatedString(data: Array(bytes[name_range]))
             module.estimatedCPU = refModule?.cpu
+            
+            if module.name == nil || module.name?.isEmpty == true {
+                module.name = EmpressReference.shared.moduleList[module.ref_mod_idx.description]?.name ?? ""
+            }
 
             
             let pos_start = Int(data[curr_step + 5])
@@ -609,6 +660,7 @@ struct ParsedBinaryPatch: Identifiable {
         return completedModules
     }
     
+
     // TODO: Possible area of improvement with generic solution
     static func calculate_io(patch_io: ParsedBinaryPatch.IO,  module: ParsedBinaryPatch.Module)  {
         
@@ -695,6 +747,33 @@ struct ParsedBinaryPatch: Identifiable {
         if module.ref_mod_idx == 101 {
             patch_io.cv_out[3] = true
             patch_io.has_cv = true
+        }
+        if module.ref_mod_idx == 20 {
+            patch_io.midi_input_list[1] = true
+        }
+        if module.ref_mod_idx == 21 {
+            patch_io.midi_input_list[3] = true
+        }
+        if module.ref_mod_idx == 35 {
+            patch_io.midi_input_list[4] = true
+        }
+        if module.ref_mod_idx == 82 {
+            patch_io.midi_input_list[2] = true
+        }
+        if module.ref_mod_idx == 86 {
+            patch_io.midi_input_list[5] = true
+        }
+        if module.ref_mod_idx == 60 {
+            patch_io.midi_output_list[1] = true
+        }
+        if module.ref_mod_idx == 61 {
+            patch_io.midi_output_list[3] = true
+        }
+        if module.ref_mod_idx == 62 {
+            patch_io.midi_output_list[4] = true
+        }
+        if module.ref_mod_idx == 84 {
+            patch_io.midi_output_list[2] = true
         }
         
         patch_io.has_stomp = !patch_io.has_cv

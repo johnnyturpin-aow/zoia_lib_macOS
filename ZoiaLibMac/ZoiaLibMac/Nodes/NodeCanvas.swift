@@ -183,15 +183,21 @@ class NodeCanvas: ObservableObject {
         }
     }
     
+    func placeNodesOrdered() {
+        modulesToPlace = patch?.parsedPatchFile?.modules ?? []
+        
+    }
+    
     
     // this is a first attempt at a dirt simple Node placement algorithm... no recursion, no scoring of node placement, no detection of crossed edges
     // it's bad - but it is dirt simple and it works
     func placeNodes() {
         
         modulesToPlace = patch?.parsedPatchFile?.modules ?? []
-        for var module in modulesToPlace {
-            module.name = module.name ?? EmpressReference.shared.moduleList[module.ref_mod_idx.description]?.name ?? ""
-        }
+//        // decided to do this during module import - helps Detail View buttons 
+//        for var module in modulesToPlace {
+//            module.name = module.name ?? EmpressReference.shared.moduleList[module.ref_mod_idx.description]?.name ?? ""
+//        }
         
         var we_got_a_problem: Int = 0
         while modulesToPlace.count > 0 {
