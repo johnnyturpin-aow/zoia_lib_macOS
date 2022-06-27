@@ -58,10 +58,35 @@ struct NodeCanvasView: View {
                 }
                 .pickerStyle(.segmented)
                 Spacer()
-                Text("Scale:")
-                Slider(value: $nodeCanvas.zoomScale, in: 0.1...2.0)
-                    .padding(.leading, 50)
-                    .frame(width: 300)
+                HStack {
+                    Divider()
+                    Text("Hidden Modules:")
+                    ForEach(HidableModules.allCases) {
+                        module in
+                        Toggle(isOn: Binding(get: { return nodeCanvas.hiddenModules.contains(module) }, set: {
+                            isOn in
+                            if isOn {
+                                nodeCanvas.hiddenModules.insert(module)
+                            } else {
+                                nodeCanvas.hiddenModules.remove(module)
+                            }
+                            nodeCanvas.updateFilteredNodes()
+                        }), label: {
+                            Label(module.description, systemImage: module.image)
+                        })
+                        .help(module.description)
+                    }
+                    
+                    Spacer()
+                }
+                HStack {
+                    Divider()
+                    Text("Scale:")
+                    Slider(value: $nodeCanvas.zoomScale, in: 0.1...2.0)
+                        .padding(.leading, 50)
+                        .frame(width: 300)
+                    Spacer()
+                }
             }
         }
     }

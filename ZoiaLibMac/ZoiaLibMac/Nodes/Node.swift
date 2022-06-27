@@ -18,12 +18,12 @@ struct NodeCodable: Codable {
     let color: CodableColor
 }
 
-class Node: ObservableObject, Identifiable, Equatable {
+class Node: ObservableObject, Identifiable, Equatable, Hashable {
     
     static func == (lhs: Node, rhs: Node) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     var id: UUID = NodeID()
     @Published var position: CGPoint = .zero
     var name: String = ""
@@ -31,7 +31,9 @@ class Node: ObservableObject, Identifiable, Equatable {
     var outputs: [Port] = []
     var colorId: Int = 1
     var mod_idx: Int
-    
+    var depth: Int = 0      // depth in tree traversal from output to input
+    var allChildNodes: Set<Node> = []
+    var row_num: Int = 0
     var color: Color {
         //return Color("Color-11")
         let colorName = "Color-" + colorId.description
@@ -58,6 +60,11 @@ class Node: ObservableObject, Identifiable, Equatable {
         self.name = name
         self.position = pos
         self.mod_idx = mod_idx
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(mod_idx)
+        hasher.combine(name)
     }
     
     func createAndInsertPort(portType: PortType, name: String) {
@@ -94,6 +101,29 @@ class Node: ObservableObject, Identifiable, Equatable {
         }
     }
     
+    
+//    // can't use recursion if we have feedback loops
+//    static func getHeightOfNodeLeft(node: Node?) -> Int {
+//        var conns: [Node] = []
+//        var maxHeight = 0
+//        guard let node = node else { return maxHeight }
+//
+//        for port in node.inputs {
+//            if let conn = port.connections {
+//                conns.append(conn.parentNode)
+//            }
+//        }
+//
+//        if conns.isEmpty { return 0 }
+//
+//        for leftNode in conns {
+//            let nodeHeight = Node.getHeightOfNodeLeft(node: leftNode)
+//            maxHeight = max(maxHeight, nodeHeight)
+//        }
+//
+//        return maxHeight + 1
+//    }
+    
     static func audioInputNode() -> Node {
         let node = Node()
         node.name = "Audio Through"
@@ -117,7 +147,7 @@ class Port: Identifiable {
     var id: UUID = UUID()
     var parentNode: Node
     var name: String = ""
-    var connection: Port?
+    var connections: [Port] = []
     var portType: PortType
     var portIndex: Int = 0
     
@@ -134,7 +164,7 @@ class Port: Identifiable {
     
     func connectTo(_ port: Port) -> Bool {
         guard portType != port.portType else { return false }
-        connection = port
+        connections.append(port)
         return true
     }
 }

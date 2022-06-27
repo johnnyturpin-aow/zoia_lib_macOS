@@ -47,6 +47,26 @@ class AppViewModel: ObservableObject {
     @Published var nodeCanvas: [String: NodeCanvas] = [:]
     
     var systemColorScheme: ColorScheme?
+    
+    // MARK: NodeView settings
+
+    var layoutChangeListeners: [String: (LayoutAlgorithm)->Void] = [:]
+    
+    @Published var nodeViewLayoutAlgorithm: LayoutAlgorithm = .moveChildNodes {
+        didSet {
+            for (_, value) in layoutChangeListeners {
+                value(nodeViewLayoutAlgorithm)
+            }
+        }
+    }
+    
+    func addLayoutChangeListener(nodeCanvasId: String, handler: @escaping (LayoutAlgorithm)->Void) {
+        layoutChangeListeners[nodeCanvasId] = handler
+    }
+    
+    func removeLayoutChangeListener(nodeCanvasId: String) {
+        layoutChangeListeners[nodeCanvasId] = nil
+    }
 
     
     // MARK: - Sorting and Filtering Properties

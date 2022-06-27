@@ -63,11 +63,14 @@ struct ZoiaLibMacApp: App {
         WindowGroup {
             NodeCanvasView()
                 .environmentObject(appModel)
-                
                 .frame(minWidth: 600, idealWidth: minSize.width, maxWidth: .infinity, minHeight: 600, idealHeight: minSize.height, maxHeight: .infinity)
                 .background(Color("nodeViewBackground"))
         }
         .handlesExternalEvents(matching: ["file"])
+        .commands {
+            NodeViewCommands(layoutAlgorithm: $appModel.nodeViewLayoutAlgorithm)
+        }
+
     }
 }
 

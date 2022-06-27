@@ -8,6 +8,22 @@ import SwiftUI
 
 
 
+struct NodeViewCommands: Commands {
+    
+    @Binding var layoutAlgorithm: LayoutAlgorithm
+    
+    var body: some Commands {
+        CommandMenu(Text("Layout")) {
+            Picker(selection: $layoutAlgorithm, label: Text("Layout Algorithm")) {
+                Text(LayoutAlgorithm.moveChildNodes.description).tag(LayoutAlgorithm.moveChildNodes)
+                Text(LayoutAlgorithm.investigation1.description).tag(LayoutAlgorithm.investigation1)
+                Text(LayoutAlgorithm.singleRow.description).tag(LayoutAlgorithm.singleRow)
+            }
+        }
+    }
+}
+
+
 struct BankCommands: Commands {
     
     

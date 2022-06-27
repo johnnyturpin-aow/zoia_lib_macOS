@@ -9,6 +9,7 @@ typealias AnimatablePoint = AnimatablePair<CGFloat, CGFloat>
 typealias AnimatableHorizPair = AnimatablePair<AnimatablePoint, AnimatablePoint>
 
 
+
 struct EdgeView: Shape {
     
     var edge: Edge
@@ -38,9 +39,9 @@ struct EdgeView: Shape {
         path.move(to: CGPoint(x: sx, y: sy))
         switch nodeCanvas.connectionStyle {
         case .curved:
-            let ctrl_pt_horiz_offset = abs(dx - sx) / EdgeView.quadFactor * (dx < sx ? 1.0 : -1.0)
+            let ctrl_pt_horiz_offset = abs(dx - sx) / EdgeView.quadFactor
             
-            path.addCurve(to: CGPoint(x: dx, y: dy), control1: CGPoint(x: sx - ctrl_pt_horiz_offset, y: sy), control2: CGPoint(x: dx + ctrl_pt_horiz_offset, y: dy))
+            path.addCurve(to: CGPoint(x: dx, y: dy), control1: CGPoint(x: sx + ctrl_pt_horiz_offset, y: sy), control2: CGPoint(x: dx - ctrl_pt_horiz_offset, y: dy))
 
         case .right_angle:
             path.addLine(to: CGPoint(x: midx, y: sy))
