@@ -482,7 +482,7 @@ class NodeCanvas: ObservableObject {
             node.position.x = curX
             node.position.y = curY + randomOffset
             replaced_nodes.append(node)
-            curX += NodeView.nodeWidth + NodeCanvas.column_spacing + randomOffset
+            curY += node.height + 30
         }
         
         // clear out nodeTable
@@ -512,6 +512,29 @@ class NodeCanvas: ObservableObject {
             if nodeTable[depth]?.isEmpty == false {
                 curX += (NodeView.nodeWidth + NodeCanvas.column_spacing) + randomOffset
             }
+        }
+        
+        // now move single outputs into place (Zebu Audio Outs + HP out)
+        // Zebu Audio Outs are single outs but they should be placed as a pair
+        if output_node.ref_mod_idx == 95 {
+            // find the other node for the output pair
+            if let otherNode = nodes.first(where: { $0.ref_mod_idx == 96 }) {
+                otherNode.position.x = output_node.position.x
+                otherNode.position.y = output_node.position.y + output_node.height + 30
+                curY = otherNode.position.y + otherNode.height + 30
+            }
+        }
+        if output_node.ref_mod_idx == 96 {
+            if let otherNode = nodes.first(where: { $0.ref_mod_idx == 95 }) {
+                otherNode.position.x = output_node.position.x
+                otherNode.position.y = output_node.position.y + output_node.height + 30
+                curY = otherNode.position.y + otherNode.height + 30
+            }
+        }
+        // move EuroBuro HP output to the output column
+        if let hpNode = nodes.first(where: { $0.ref_mod_idx == 92 }) {
+            hpNode.position.x = output_node.position.x
+            hpNode.position.y = curY
         }
         
         for(_, values) in nodeTable {
