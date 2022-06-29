@@ -25,14 +25,14 @@ struct NodeCanvasView: View {
     func trackScrollWheel() {
         NSApp.publisher(for: \.currentEvent)
             .filter { event in event?.type == .scrollWheel }
-            .throttle(for: .milliseconds(200),
+            .throttle(for: .milliseconds(25),
                       scheduler: DispatchQueue.main,
                       latest: true)
             .sink { event in
-                print("scrollWheel moved by \(event?.deltaY ?? 0)")
-                
-                nodeCanvas.zoomScale += (CGFloat(event?.deltaY ?? 0) / 8)
-                //self?.goBackOrForwardBy(delta: Int(event?.deltaY ?? 0))
+                // for now we have a minimum zoomScale but not a mazimum
+                let targetZoomScale = nodeCanvas.zoomScale + (CGFloat(event?.deltaY ?? 0) / 16)
+                nodeCanvas.zoomScale = max(targetZoomScale, NodeCanvas.minZoomScale)
+                nodeCanvas.dragChange += 1
             }
             .store(in: &subs)
     }
@@ -45,7 +45,7 @@ struct NodeCanvasView: View {
                 Rectangle().fill(Color("nodeViewBackground"))
                 DistributionView(nodeCanvas: nodeCanvas)
                     .padding(0)
-                    .scaleEffect(nodeCanvas.zoomScale)
+                    .scaleEffect(nodeCanvas.zoomScale, anchor: .topLeading)
                     .offset(x: nodeCanvas.portalPosition.x + nodeCanvas.dragOffset.width, y: nodeCanvas.portalPosition.y + nodeCanvas.dragOffset.height)
                     .animation(.linear, value: nodeCanvas.dragChange)
                 Rectangle()
@@ -59,6 +59,13 @@ struct NodeCanvasView: View {
                             phase -= 10
                         }
                     }
+            }
+            .onAppear {
+                nodeCanvas.viewSize = geometry.size
+            }
+            .onChange(of: geometry.size) {
+                newSize in
+                nodeCanvas.viewSize = newSize
             }
             .padding(0)
             .clipped()
@@ -77,6 +84,23 @@ struct NodeCanvasView: View {
                     self.onDraggingEnded(value)
                 })
             .gesture(DragGesture()
+                .modifiers(.command)
+                .onChanged {
+                    value in
+                    
+                    // calculate which axis the user is trying to zoom with
+                    let largestChange = max(value.translation.width, value.translation.height)
+                    let targetZoomScale = nodeCanvas.zoomScale - largestChange / 1000
+                    nodeCanvas.zoomScale = max(targetZoomScale, NodeCanvas.minZoomScale)
+                    nodeCanvas.dragChange += 1
+                }
+                .onEnded {
+                    value in
+                    let targetZoomScale = nodeCanvas.zoomScale - value.translation.height / 1000
+                    nodeCanvas.zoomScale = max(targetZoomScale, NodeCanvas.minZoomScale)
+                    nodeCanvas.dragChange += 1
+                })
+            .gesture(DragGesture()
                 .onChanged {
                     value in
                     self.selectionRectStarted(value, containerSize: geometry.size, offset: CGPoint(x: 0, y: 0))
@@ -85,7 +109,6 @@ struct NodeCanvasView: View {
                     value in
                     self.selectionRectEnded(value)
                 })
-            
         }
         .onAppear {
             trackScrollWheel()
@@ -94,17 +117,33 @@ struct NodeCanvasView: View {
         .navigationTitle(nodeCanvas.patch?.parsedPatchFile?.name ?? "Node Editor")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                
+
                 HStack {
+                    
                     Text("Layout Algorithm")
                     Picker("Layout Algorithm", selection: $nodeCanvas.layoutAlgorithm) {
-                        Image(systemName: LayoutAlgorithm.singleRow.image).tag(LayoutAlgorithm.singleRow)
-                        Image(systemName: LayoutAlgorithm.simple.image).tag(LayoutAlgorithm.simple)
-                        Image(systemName: LayoutAlgorithm.simpleRecursive.image).tag(LayoutAlgorithm.simpleRecursive)
-                        Image(systemName: LayoutAlgorithm.moveChildNodes.image).tag(LayoutAlgorithm.moveChildNodes)
-                        Image(systemName: LayoutAlgorithm.recurseOnFeedback.image).tag(LayoutAlgorithm.recurseOnFeedback)
+                        HStack {
+                            Text(LayoutAlgorithm.singleRow.rawValue)
+                            Image(systemName: LayoutAlgorithm.singleRow.image)
+                        }.tag(LayoutAlgorithm.singleRow)
+                        HStack {
+                            Text(LayoutAlgorithm.simple.rawValue)
+                            Image(systemName: LayoutAlgorithm.simple.image)
+                        }.tag(LayoutAlgorithm.simple)
+                        HStack {
+                            Text(LayoutAlgorithm.simpleRecursive.rawValue)
+                            Image(systemName: LayoutAlgorithm.simpleRecursive.image)
+                        }.tag(LayoutAlgorithm.simpleRecursive)
+                        HStack {
+                            Text(LayoutAlgorithm.moveChildNodes.rawValue)
+                            Image(systemName: LayoutAlgorithm.moveChildNodes.image)
+                        }.tag(LayoutAlgorithm.moveChildNodes)
+                        HStack {
+                            Text(LayoutAlgorithm.recurseOnFeedback.rawValue)
+                            Image(systemName: LayoutAlgorithm.recurseOnFeedback.image)
+                        }.tag(LayoutAlgorithm.recurseOnFeedback)
                     }
-                    .pickerStyle(.segmented)
+                    
                 }
                 HStack {
                     Divider()
@@ -142,7 +181,7 @@ struct NodeCanvasView: View {
                 HStack {
                     Divider()
                     Text("Scale:")
-                    Slider(value: $nodeCanvas.zoomScale, in: 0.1...2.0)
+                    Slider(value: $nodeCanvas.zoomScale, in: 0.05...2.0)
                         .padding(.leading, 50)
                         .frame(width: 300)
                     Spacer()
@@ -156,10 +195,8 @@ struct NodeCanvasView: View {
         if !nodeCanvas.isDraggingSelectionRect {
             nodeCanvas.isDraggingSelectionRect = true
         }
-        
-        let scaledStartLocation = value.startLocation
-        let scaledTranslation = value.translation
-        nodeCanvas.selectionRect = CGRect(x: scaledStartLocation.x, y: scaledStartLocation.y, width: scaledTranslation.width, height: scaledTranslation.height)
+
+        nodeCanvas.selectionRect = CGRect(x: value.startLocation.x, y: value.startLocation.y, width: value.translation.width, height: value.translation.height)
     }
     
     func selectionRectEnded(_ value: DragGesture.Value) {

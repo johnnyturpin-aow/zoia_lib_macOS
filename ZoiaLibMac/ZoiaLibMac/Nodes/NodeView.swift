@@ -89,14 +89,17 @@ struct NodeView: View {
             .onChanged {
                 value in
                 if !nodeCanvas.isDraggingNode {
+                    // if we are starting a new drag, and the current node is not selected
+                    // then we assume this should be the only node that is dragged
                     if !nodeCanvas.selection.isNodeSelected(node) {
+                        nodeCanvas.selection.deselectAllNodes()
                         nodeCanvas.selection.selectNode(node)
                     }
                     nodeCanvas.isDraggingNode = true
                     selection.startDragging(nodeCanvas)
                 }
                 
-                let scaledTranslation = value.translation.scaledDownTo(nodeCanvas.zoomScale)
+                let scaledTranslation = value.translation.unscaleBy(nodeCanvas.zoomScale)
                 nodeCanvas.processNodeTranslation(scaledTranslation, nodes: selection.draggingNodes)
                 nodeCanvas.nodeDragChange += 1
             }
@@ -104,7 +107,7 @@ struct NodeView: View {
                 value in
                 if nodeCanvas.isDraggingNode {
                     nodeCanvas.isDraggingNode = false
-                    let scaledTranslation = value.translation.scaledDownTo(nodeCanvas.zoomScale)
+                    let scaledTranslation = value.translation.unscaleBy(nodeCanvas.zoomScale)
                     nodeCanvas.processNodeTranslation(scaledTranslation, nodes: selection.draggingNodes)
                     selection.stopDragging(nodeCanvas)
                 }

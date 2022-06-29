@@ -31,7 +31,7 @@ struct NodeCanvasCodable: Codable {
 enum LayoutAlgorithm: String, Identifiable {
     
     case singleRow = "Single Row"
-    case simple = "Simple"
+    case simple = "Compact"
     case simpleRecursive = "Recursive 1"
     case moveChildNodes = "Recursive 2"
     case recurseOnFeedback = "Recursive 3"
@@ -42,9 +42,9 @@ enum LayoutAlgorithm: String, Identifiable {
     var image: String {
         switch self {
         case .singleRow:
-            return "square.and.line.vertical.and.square"
+            return "minus.square"
         case .simple:
-            return "arrow.right.square"
+            return "square.grid.3x3.square"
         case .simpleRecursive:
             return "1.square"
         case .moveChildNodes:
@@ -115,16 +115,17 @@ class NodeCanvas: ObservableObject {
     static let row0_y: CGFloat = 0
     static let col0_x: CGFloat = 0
     static let col5_x: CGFloat = (300 + 30) * 6
-    
+    static let minZoomScale: CGFloat = 0.05
     static let maxOffset: Int = 30
     
     static let lastColIndex: Int = 5000
     static let column_spacing: CGFloat = 300
     // Int is the column - the array of node are the nodes down that column
     @Published var selection: SelectionHandler
-    @Published var zoomScale: CGFloat = 0.9
+    @Published var zoomScale: CGFloat = 1.0
     @Published var portalPosition: CGPoint = .zero
     @Published var dragOffset: CGSize = .zero
+    var viewSize: CGSize = .zero
     @Published var isDraggingNode: Bool = false
     @Published var isDraggingCanvas: Bool = false
     
@@ -140,8 +141,9 @@ class NodeCanvas: ObservableObject {
     func selectAllNodesInSelectionRect() {
         
         for node in nodes {
-            let nodeRect = CGRect(x: node.position.x, y: node.position.y, width: NodeView.nodeWidth, height: node.height)
-            if selectionRect.contains(nodeRect) || selectionRect.intersects(nodeRect)  {
+            let scaledSelectionRect = CGRect(x: (selectionRect.minX - portalPosition.x) / zoomScale , y: (selectionRect.minY - portalPosition.y) / zoomScale , width: selectionRect.width / zoomScale, height: selectionRect.height / zoomScale )
+            let nodeRect = CGRect(x: (node.position.x) , y: (node.position.y) , width: NodeView.nodeWidth , height: node.height )
+            if scaledSelectionRect.contains(nodeRect) || scaledSelectionRect.intersects(nodeRect)  {
                 self.selection.selectNode(node)
             } else {
                 if self.selection.selectedNodeIDs.contains(node.id) {
@@ -172,7 +174,9 @@ class NodeCanvas: ObservableObject {
     var modulesToPlace: [ParsedBinaryPatch.Module] = []
     var nodeTable: [Int:[Node]] = [:]
     var moduleTable: [Int: [ParsedBinaryPatch.Module]] = [:]
+    
     //var modulesInCurrentPass: [ParsedBinaryPatch.Module] = []
+    
     
     
     var hiddenModules: Set<HidableModules> = []
@@ -326,9 +330,50 @@ class NodeCanvas: ObservableObject {
         }
     }
     
+    func fitNodesInView() {
+        
+        var minX: CGFloat = .infinity
+        var minY: CGFloat = .infinity
+        var maxX: CGFloat = .leastNonzeroMagnitude
+        var maxY: CGFloat = .leastNonzeroMagnitude
+        
+        var tlNode: Node?
+        var brNode: Node?
+        for node in nodes {
+            if node.position.x < minX || node.position.y < minY {
+                tlNode = node
+            }
+            if (node.position.x + NodeView.nodeWidth) > maxX || (node.position.y + node.height) > maxY {
+                brNode = node
+            }
+            minX = min(minX, node.position.x)
+            minY = min(minY, node.position.y)
+            maxX = max(node.position.x + NodeView.nodeWidth, maxX)
+            maxY = max(node.position.y + node.height, maxY)
+        }
+        
+        self.portalPosition.x = minX + viewSize.width * 0.05
+        self.portalPosition.y = minY + viewSize.height * 0.05
+        
+        let totalWidth = maxX - minX
+        let totalHeight = maxY - minY
+        
+        if viewSize.width > 0 && viewSize.height > 0 && totalWidth > 0 && totalHeight > 0 {
+            let neededZoomForWidth = self.viewSize.width / totalWidth
+            let neededZoomForHeight = self.viewSize.height / totalHeight
+            
+            let targetZoom = min(neededZoomForWidth, neededZoomForHeight)
+            if targetZoom < 1.0 && targetZoom > 0.05 {
+                zoomScale = targetZoom - 0.05
+            }
+        }
+    }
+    
     func placeNodes(useSavedNodes: Bool) {
         nodes = []
         edges = []
+        
+        print("placing nodes - hopefully we have a view size by now...")
         
         if useSavedNodes && savedNodes != nil {
             placeNodesFromSave()
@@ -349,6 +394,8 @@ class NodeCanvas: ObservableObject {
         
         // placing connections is always last
         placeConnections()
+        
+        fitNodesInView()
     }
     
     
@@ -453,10 +500,10 @@ class NodeCanvas: ObservableObject {
         }
         
         // now loop through all columns (depth) and each row within each column
-        curY = 300 + randomOffset
+        curY = NodeCanvas.row0_y + randomOffset
         curX = randomOffset
         for depth in (1...maxDepth).reversed() {
-            curY = 300 + randomOffset
+            curY = NodeCanvas.row0_y + randomOffset
             for node in nodeTable[depth] ?? [] {
                 node.position.x = curX                  //CGFloat(column) * (NodeView.nodeWidth + NodeCanvas.column_spacing)
                 node.position.y = curY
@@ -500,7 +547,10 @@ class NodeCanvas: ObservableObject {
                     }
                 }
             }
-            
+            if node == adjustmentRoot {
+                adjustmentRoot = nil
+                feedbackList = []
+            }
         case .moveChildNodes:
             if node.depth > 0 && depth > node.depth {
                 let depthDiff = depth - node.depth
@@ -514,11 +564,6 @@ class NodeCanvas: ObservableObject {
         default:
             break
 
-        }
-        
-        if node == adjustmentRoot {
-            adjustmentRoot = nil
-            feedbackList = []
         }
 
         node.depth = max(node.depth, depth)

@@ -10,40 +10,49 @@ import CoreGraphics
 
 
 extension CGSize {
-  func scaledDownTo(_ factor: CGFloat) -> CGSize {
-    return CGSize(width: width/factor, height: height/factor)
-  }
-  
-  var length: CGFloat {
-    return sqrt(pow(width, 2) + pow(height, 2))
-  }
-  
-  var inverted: CGSize {
-    return CGSize(width: -width, height: -height)
-  }
+    func unscaleBy(_ factor: CGFloat) -> CGSize {
+        return CGSize(width: width/factor, height: height/factor)
+    }
+    
+    var length: CGFloat {
+        return sqrt(pow(width, 2) + pow(height, 2))
+    }
+    
+    var inverted: CGSize {
+        return CGSize(width: -width, height: -height)
+    }
 }
 
 extension CGPoint {
-  func translatedBy(x: CGFloat, y: CGFloat) -> CGPoint {
-    return CGPoint(x: self.x + x, y: self.y + y)
-  }
+    func translatedBy(x: CGFloat, y: CGFloat) -> CGPoint {
+        return CGPoint(x: self.x + x, y: self.y + y)
+    }
 }
 
 extension CGPoint {
-  func alignCenterInParent(_ parent: CGSize) -> CGPoint {
-    let x = parent.width/2 + self.x
-    let y = parent.height/2 + self.y
-    return CGPoint(x: x, y: y)
-  }
-  
-  func scaledFrom(_ factor: CGFloat) -> CGPoint {
-    return CGPoint(
-      x: self.x * factor,
-      y: self.y * factor)
-  }
+    func alignCenterInParent(_ parent: CGSize) -> CGPoint {
+        let x = parent.width/2 + self.x
+        let y = parent.height/2 + self.y
+        return CGPoint(x: x, y: y)
+    }
+    
+    func scaledBy(_ factor: CGFloat) -> CGPoint {
+        return CGPoint(
+            x: self.x * factor,
+            y: self.y * factor)
+    }
+    
+    func unscaleBy(_ factor: CGFloat) -> CGPoint {
+        return CGPoint(x: self.x / factor, y: self.y / factor)
+    }
 }
 
 
+extension CGRect {
+    func scaledBy(_ scale: CGFloat) -> CGRect {
+        return CGRect(x: minX * scale, y: minY * scale, width: width * scale, height: height * scale)
+    }
+}
 extension Array {
     func item(at index: Int) -> Element? {
         return indices.contains(index) ? self[index] : nil
@@ -62,23 +71,23 @@ extension Date {
 
 extension URL {
     var isDirectory: Bool {
-       (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
+        (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
     }
 }
 
 extension String {
-   func convertToValidFileName() -> String {
-       var invalidCharacters = CharacterSet(charactersIn: ":/")
-       invalidCharacters.formUnion(.newlines)
-       invalidCharacters.formUnion(.illegalCharacters)
-       invalidCharacters.formUnion(.controlCharacters)
-
-       let newFilename = self
-           .components(separatedBy: invalidCharacters)
-           .joined(separator: "-")
-       
-       return newFilename
-   }
+    func convertToValidFileName() -> String {
+        var invalidCharacters = CharacterSet(charactersIn: ":/")
+        invalidCharacters.formUnion(.newlines)
+        invalidCharacters.formUnion(.illegalCharacters)
+        invalidCharacters.formUnion(.controlCharacters)
+        
+        let newFilename = self
+            .components(separatedBy: invalidCharacters)
+            .joined(separator: "-")
+        
+        return newFilename
+    }
 }
 
 extension CGKeyCode
@@ -96,7 +105,7 @@ extension CGKeyCode
 }
 
 extension Color {
-
+    
     var components: (r: Double, g: Double, b: Double, o: Double) {
         var nsColor: NSColor
         

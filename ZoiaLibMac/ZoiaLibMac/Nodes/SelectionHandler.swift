@@ -62,10 +62,7 @@ class SelectionHandler: ObservableObject {
     }
     
     func deselectNode(_ node: Node) {
-        if let index = selectedNodeIDs.firstIndex(where: { $0 == node.id }) {
-            print("deselecting node with ID = \(node.mod_idx)")
-            selectedNodeIDs.remove(at: index)
-        }
+        selectedNodeIDs = selectedNodeIDs.filter({ $0 != node.id })
     }
     
     func selectedNodes(in canvas: NodeCanvas) -> [Node] {
