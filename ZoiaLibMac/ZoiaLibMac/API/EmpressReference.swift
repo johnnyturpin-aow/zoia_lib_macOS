@@ -10,6 +10,12 @@ typealias EmpressModuleList = [String: EmpressReference.Module]
 typealias ModuleOption = [String: [IntOrString]]
 typealias ModuleBlock = [String: EmpressReference.Block]
 
+
+
+// Factory Patches downloads
+// https://patchstorage.com/wp-content/uploads/2019/05/ZOIA-FACTORY-PATCHES.zip
+// https://patchstorage.com/wp-content/uploads/2021/09/ZOIA-Euroburo-Factory-Patches.zip
+
 class EmpressReference {
     
     static let shared = EmpressReference()

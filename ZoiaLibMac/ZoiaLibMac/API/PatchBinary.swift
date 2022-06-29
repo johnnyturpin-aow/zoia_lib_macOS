@@ -333,7 +333,6 @@ struct ParsedBinaryPatch: Identifiable {
         //# Extract the string name of the patch.
         let name = ParsedBinaryPatch.parseNullTerminatedString(data: Array(bytes.dropFirst(4)))
         patch.name = name ?? ""
-        
 
         //# Unpack the binary data.
         // data = struct.unpack("i" * int(len(byt) / 4), byt)
@@ -452,6 +451,14 @@ struct ParsedBinaryPatch: Identifiable {
             let s2 = Int(data[curr_step + 2])
             let d1 = Int(data[curr_step + 3])
             let d2 = Int(data[curr_step + 4])
+            
+//            if patch.name.lowercased().contains("chipm") == true  {
+//                if d1 == 31 || d1 == 35 || d1 == 38 {
+//
+//                    print("connection src_mod_idx = \(s1), dst_mod_idx = \(d1)")
+//                    //print("check here")
+//                }
+//            }
             let strength = Double(Int(data[curr_step + 5]) / 100)
             let connection = ParsedBinaryPatch.ConnectionRaw(source: [s1,s2], destination: [d1,d2], strength: strength)
             patch.connections.append(connection)
@@ -573,7 +580,7 @@ struct ParsedBinaryPatch: Identifiable {
             // block index is index of reference data / not parsed data
             guard let source_ref_block_idx = connection.source.item(at: 1) else { continue }
             guard let dest_ref_block_idx = connection.destination.item(at: 1) else { continue }
-            
+ 
             let source_module = patch.modules.item(at: source_module_idx)
             let source_block = EmpressReference.shared.moduleList[source_module?.ref_mod_idx.description ?? ""]?.blocks.first(where: { $0.values.first?.position == source_ref_block_idx })
             let dest_module = patch.modules.item(at: dest_module_idx)
@@ -634,9 +641,11 @@ struct ParsedBinaryPatch: Identifiable {
         for (index, var module) in updatedModules.enumerated() {
             var used_blocks: [ModuleBlock] = []
             var unused_blocks: [ModuleBlock] = []
+            
             for block in module.input_blocks {
                 used_blocks.append(block)
             }
+            
             for block in module.output_blocks {
                 used_blocks.append(block)
             }
@@ -648,11 +657,26 @@ struct ParsedBinaryPatch: Identifiable {
             }
             
             for block in unused_blocks {
+                
+                if block.keys.first?.lowercased().contains("output") == true || block.keys.first?.lowercased().contains("audio_out") == true {
+                    module.output_blocks.append(block)
+                }
+                else if block.keys.first?.lowercased().contains("input") == true || block.keys.first?.lowercased().contains("audio_in") == true {
+                    module.input_blocks.append(block)
+                } else if block.values.first?.isParam == true {
+                    module.input_blocks.append(block)
+                } else {
+                    module.output_blocks.append(block)
+                }
+                
+                
+                /*
                 if block.values.first?.isParam == true {
                     module.input_blocks.append(block)
                 } else {
                     module.output_blocks.append(block)
                 }
+                */
             }
             
             completedModules[index] = module

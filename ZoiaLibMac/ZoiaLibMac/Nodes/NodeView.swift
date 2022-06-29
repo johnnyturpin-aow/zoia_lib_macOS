@@ -70,19 +70,25 @@ struct NodeView: View {
             .offset(x: NodeView.ioStackOutputHoffset, y: NodeView.ioStackVoffset)
             
         }
+        .gesture(TapGesture().modifiers(.shift).onEnded {
+            if nodeCanvas.selection.isNodeSelected(node) {
+                nodeCanvas.selection.deselectNode(node)
+            } else {
+                nodeCanvas.selection.selectNode(node)
+            }
+        })
         .onTapGesture {
             if nodeCanvas.selection.isNodeSelected(node) {
                 nodeCanvas.selection.deselectNode(node)
             } else {
+                nodeCanvas.selection.deselectAllNodes()
                 nodeCanvas.selection.selectNode(node)
             }
         }
         .gesture(DragGesture(minimumDistance: 1, coordinateSpace: .global)
             .onChanged {
                 value in
-                
                 if !nodeCanvas.isDraggingNode {
-                    
                     if !nodeCanvas.selection.isNodeSelected(node) {
                         nodeCanvas.selection.selectNode(node)
                     }
@@ -102,7 +108,6 @@ struct NodeView: View {
                     nodeCanvas.processNodeTranslation(scaledTranslation, nodes: selection.draggingNodes)
                     selection.stopDragging(nodeCanvas)
                 }
-
             })
     }
 }

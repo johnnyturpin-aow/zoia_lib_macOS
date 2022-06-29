@@ -49,7 +49,8 @@ class SelectionHandler: ObservableObject {
     @Published private(set) var selectedNodeIDs: [NodeID] = []
     
     func selectNode(_ node: Node) {
-        selectedNodeIDs = [node.id]
+        print("selecting node with ID = \(node.mod_idx)")
+        selectedNodeIDs.append(node.id)
     }
     
     func isNodeSelected(_ node: Node) -> Bool {
@@ -61,7 +62,10 @@ class SelectionHandler: ObservableObject {
     }
     
     func deselectNode(_ node: Node) {
-        selectedNodeIDs = []
+        if let index = selectedNodeIDs.firstIndex(where: { $0 == node.id }) {
+            print("deselecting node with ID = \(node.mod_idx)")
+            selectedNodeIDs.remove(at: index)
+        }
     }
     
     func selectedNodes(in canvas: NodeCanvas) -> [Node] {

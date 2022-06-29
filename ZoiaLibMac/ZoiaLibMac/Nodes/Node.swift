@@ -30,7 +30,8 @@ class Node: ObservableObject, Identifiable, Equatable, Hashable {
     var inputs: [Port] = []
     var outputs: [Port] = []
     var colorId: Int = 1
-    var mod_idx: Int
+    var mod_idx: Int        // mod_idx is the index into the module list
+    var ref_mod_idx: Int    // ref_mod_idx is the index into the list of reference modules (i.e. what type of module this is)
     var depth: Int = 0      // depth in tree traversal from output to input
     var allChildNodes: Set<Node> = []
     var row_num: Int = 0
@@ -54,12 +55,14 @@ class Node: ObservableObject, Identifiable, Equatable, Hashable {
     
     init() {
         self.mod_idx = 0
+        self.ref_mod_idx = 0
     }
     
-    init(name: String, mod_idx: Int, pos: CGPoint) {
+    init(name: String, mod_idx: Int, ref_mod_idx: Int, pos: CGPoint) {
         self.name = name
         self.position = pos
         self.mod_idx = mod_idx
+        self.ref_mod_idx = ref_mod_idx
     }
     
     func hash(into hasher: inout Hasher) {
@@ -83,6 +86,7 @@ class Node: ObservableObject, Identifiable, Equatable, Hashable {
             }
         }
     }
+
     
     func createAndAppendPort(portType: PortType, name: String) {
         let port = Port(parent: self, portType: portType)
@@ -100,29 +104,6 @@ class Node: ObservableObject, Identifiable, Equatable, Hashable {
             }
         }
     }
-    
-    
-//    // can't use recursion if we have feedback loops
-//    static func getHeightOfNodeLeft(node: Node?) -> Int {
-//        var conns: [Node] = []
-//        var maxHeight = 0
-//        guard let node = node else { return maxHeight }
-//
-//        for port in node.inputs {
-//            if let conn = port.connections {
-//                conns.append(conn.parentNode)
-//            }
-//        }
-//
-//        if conns.isEmpty { return 0 }
-//
-//        for leftNode in conns {
-//            let nodeHeight = Node.getHeightOfNodeLeft(node: leftNode)
-//            maxHeight = max(maxHeight, nodeHeight)
-//        }
-//
-//        return maxHeight + 1
-//    }
     
     static func audioInputNode() -> Node {
         let node = Node()
@@ -160,6 +141,13 @@ class Port: Identifiable {
         self.parentNode = parent
         self.portType = portType
         self.name = name
+    }
+    
+    func removeConnection(_ node: Node) {
+        let portIndex = connections.firstIndex(where: { $0.parentNode == node })
+        if let foundIndex = portIndex {
+            connections.remove(at: foundIndex)
+        }
     }
     
     func connectTo(_ port: Port) -> Bool {

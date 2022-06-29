@@ -15,9 +15,11 @@ struct NodeViewCommands: Commands {
     var body: some Commands {
         CommandMenu(Text("Layout")) {
             Picker(selection: $layoutAlgorithm, label: Text("Layout Algorithm")) {
-                Text(LayoutAlgorithm.moveChildNodes.description).tag(LayoutAlgorithm.moveChildNodes)
-                Text(LayoutAlgorithm.investigation1.description).tag(LayoutAlgorithm.investigation1)
-                Text(LayoutAlgorithm.singleRow.description).tag(LayoutAlgorithm.singleRow)
+                Text(LayoutAlgorithm.singleRow.rawValue).tag(LayoutAlgorithm.singleRow)
+                Text(LayoutAlgorithm.simple.rawValue).tag(LayoutAlgorithm.simple)
+                Text(LayoutAlgorithm.simpleRecursive.rawValue).tag(LayoutAlgorithm.simpleRecursive)
+                Text(LayoutAlgorithm.moveChildNodes.rawValue).tag(LayoutAlgorithm.moveChildNodes)
+                Text(LayoutAlgorithm.recurseOnFeedback.rawValue).tag(LayoutAlgorithm.recurseOnFeedback)
             }
         }
     }

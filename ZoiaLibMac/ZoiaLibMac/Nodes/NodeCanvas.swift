@@ -29,23 +29,31 @@ struct NodeCanvasCodable: Codable {
 
 
 enum LayoutAlgorithm: String, Identifiable {
-    case moveChildNodes = "Mode 1"
-    case investigation1 = "Mode 2"
-    case singleRow = "Single Row"
     
+    case singleRow = "Single Row"
+    case simple = "Simple"
+    case simpleRecursive = "Recursive 1"
+    case moveChildNodes = "Recursive 2"
+    case recurseOnFeedback = "Recursive 3"
+
     var id: String { return rawValue }
     
     
-    var description: String {
+    var image: String {
         switch self {
-        case .moveChildNodes:
-            return "Mode 1"
-        case .investigation1:
-            return "Mode 2"
         case .singleRow:
-            return "Single Row"
+            return "square.and.line.vertical.and.square"
+        case .simple:
+            return "arrow.right.square"
+        case .simpleRecursive:
+            return "1.square"
+        case .moveChildNodes:
+            return "2.square"
+        case .recurseOnFeedback:
+            return "3.square"
         }
     }
+    
 }
 
 // 15 = PushButton
@@ -102,40 +110,13 @@ class NodeCanvas: ObservableObject {
     init() {
         selection = SelectionHandler()
     }
-    
-    func open(url: URL, appModel: AppViewModel) {
-        self.appModel = appModel
-        
-        ZoiaBundle.openZoiaBundle(filePath: url) {
-            observablePatch in
-            
-            self.bundlePath = url
-            self.patch = observablePatch
-            
-            if let patchName = self.patch?.parsedPatchFile?.name {
-                self.appModel?.addLayoutChangeListener(nodeCanvasId: patchName, handler: {
-                    algorithm in
-                    
-                    print("algorithm changed")
-                    if algorithm != self.layoutAlgorithm {
-                        self.layoutAlgorithm = algorithm
-                    }
-                })
-            }
-            
-            self.loadNodes {
-                _ in
-                //self.placeNodes()
-                //self.placeConnections()
-                self.placeNodesOrdered(useSavedNodes: true)
-            }
-        }
-    }
 
     
     static let row0_y: CGFloat = 0
     static let col0_x: CGFloat = 0
     static let col5_x: CGFloat = (300 + 30) * 6
+    
+    static let maxOffset: Int = 30
     
     static let lastColIndex: Int = 5000
     static let column_spacing: CGFloat = 300
@@ -147,6 +128,29 @@ class NodeCanvas: ObservableObject {
     @Published var isDraggingNode: Bool = false
     @Published var isDraggingCanvas: Bool = false
     
+    @Published var isDraggingSelectionRect: Bool = false
+    @Published var selectionRect: CGRect = .zero {
+        didSet {
+            if isDraggingSelectionRect {
+                selectAllNodesInSelectionRect()
+            }
+        }
+    }
+    
+    func selectAllNodesInSelectionRect() {
+        
+        for node in nodes {
+            let nodeRect = CGRect(x: node.position.x, y: node.position.y, width: NodeView.nodeWidth, height: node.height)
+            if selectionRect.contains(nodeRect) || selectionRect.intersects(nodeRect)  {
+                self.selection.selectNode(node)
+            } else {
+                if self.selection.selectedNodeIDs.contains(node.id) {
+                    self.selection.deselectNode(node)
+                }
+            }
+        }
+    }
+    
     @Published var dragChange: Int = 0
     @Published var nodeDragChange: Int = 0
     @Published var connectionStyle: PipeType = .curved {
@@ -156,10 +160,10 @@ class NodeCanvas: ObservableObject {
         }
     }
     
-    var layoutAlgorithm: LayoutAlgorithm = .moveChildNodes {
+    @Published var layoutAlgorithm: LayoutAlgorithm = .moveChildNodes {
         didSet {
             if self.patch != nil {
-                self.placeNodesOrdered(useSavedNodes: false)
+                self.placeNodes(useSavedNodes: false)
             }
         }
     }
@@ -168,7 +172,7 @@ class NodeCanvas: ObservableObject {
     var modulesToPlace: [ParsedBinaryPatch.Module] = []
     var nodeTable: [Int:[Node]] = [:]
     var moduleTable: [Int: [ParsedBinaryPatch.Module]] = [:]
-    var modulesInCurrentPass: [ParsedBinaryPatch.Module] = []
+    //var modulesInCurrentPass: [ParsedBinaryPatch.Module] = []
     
     
     var hiddenModules: Set<HidableModules> = []
@@ -193,6 +197,35 @@ class NodeCanvas: ObservableObject {
         case initialColumn(nextYOffset: CGFloat)
         case arbitraryColumn(column: Int, nextYOffset: CGFloat)
     }
+    
+    
+    func open(url: URL, appModel: AppViewModel) {
+        self.appModel = appModel
+        
+        ZoiaBundle.openZoiaBundle(filePath: url) {
+            observablePatch in
+            
+            self.bundlePath = url
+            self.patch = observablePatch
+            
+            if let patchName = self.patch?.parsedPatchFile?.name {
+                self.appModel?.addLayoutChangeListener(nodeCanvasId: patchName, handler: {
+                    algorithm in
+                    
+                    print("algorithm changed")
+                    if algorithm != self.layoutAlgorithm {
+                        self.layoutAlgorithm = algorithm
+                    }
+                })
+            }
+            
+            self.loadNodes {
+                _ in
+                self.placeNodes(useSavedNodes: true)
+            }
+        }
+    }
+
     
     func positionNode(_ node: Node, position: CGPoint) {
         node.position = position
@@ -243,7 +276,7 @@ class NodeCanvas: ObservableObject {
         let nodeList = NodeCanvasCodable(nodeList: listOfNodes, connectionStyle: self.connectionStyle)
         
         ZoiaBundle.saveNodeList(bundleUrl: bundleUrl, nodeList: nodeList) {
-            print("nodes saved")
+            //print("nodes saved")
         }
     }
     
@@ -261,42 +294,188 @@ class NodeCanvas: ObservableObject {
         }
     }
     
-    
-    func clearConnections() {
-        for node in nodes {
-            for input in node.inputs {
-                input.connections = []
-            }
-            for output in node.outputs {
-                output.connections = []
-            }
-        }
-        
-        self.edges = []
+    var randomOffset: CGFloat {
+        return self.connectionStyle == .right_angle ? CGFloat(Int.random(in: (-1 * NodeCanvas.maxOffset)...NodeCanvas.maxOffset)) : 0
+    }
+
+    func isModuleVisible(module: ParsedBinaryPatch.Module) -> Bool {
+        return !self.hiddenModules.contains(where: { $0.rawValue == module.ref_mod_idx })
+    }
+
+    func updateFilteredNodes() {
+        placeNodes(useSavedNodes: true)
     }
     
-    func placeConnections() {
+    
+    // some patches use multiple instances of output nodes - we will consolidate all instances into a single instance
+    // this should be called prior to any connections made as it currently doesn't reconnect ports / connections
+    // for now, the only global module instance we support is Audio Output
+    func consolidateGlobalNodes() {
+        let dividedNodes: [Bool:[Node]] = Dictionary.init(grouping: nodes, by: { $0.ref_mod_idx == 2 })
         
-        clearConnections()
-        for blockConnection in patch?.parsedPatchFile?.blockConnections ?? [] {
-            
-            guard let srcNode = self.nodes.first(where: { $0.mod_idx == blockConnection.source_module_idx }) else { continue }
-            guard let dstNode = self.nodes.first(where: { $0.mod_idx == blockConnection.dest_module_idx }) else { continue }
-            guard let srcPortIndex = blockConnection.source_block_idx else { continue }
-            guard let destPortIndex = blockConnection.dest_block_idx else { continue }
-            guard let srcPort = srcNode.outputs.item(at: srcPortIndex) else  { continue }
-            guard let dstPort = dstNode.inputs.item(at: destPortIndex) else {continue }
-            
-            let srcConnection = NodeConnection(node: srcNode, port: srcPort)
-            let endConnection = NodeConnection(node: dstNode, port: dstPort)
-            
-            _ = srcPort.connectTo(dstPort)
-            _ = dstPort.connectTo(srcPort)
-            let edge = Edge(src: srcConnection, dst: endConnection, strength: 100)
-            self.edges.append(edge)
+        let outputNodes: [Node] = dividedNodes[true] ?? []
+        
+        if outputNodes.count > 1 {
+            let firstOutputNode = outputNodes.first
+            //var remainingNodes = Array(outputNodes.dropFirst())
+            nodes = dividedNodes[false] ?? []
+            if let outputNode = firstOutputNode {
+                nodes.append(outputNode)
+            }
+
         }
     }
     
+    func placeNodes(useSavedNodes: Bool) {
+        nodes = []
+        edges = []
+        
+        if useSavedNodes && savedNodes != nil {
+            placeNodesFromSave()
+        } else {
+            switch layoutAlgorithm {
+            case .simple:
+                placeNodesInputToOutput()
+            case .simpleRecursive:
+                placeNodesRecursive()
+            case .moveChildNodes:
+                placeNodesRecursive()
+            case .recurseOnFeedback:
+                placeNodesRecursive()
+            case .singleRow:
+                placeNodesSingleRow()
+            }
+        }
+        
+        // placing connections is always last
+        placeConnections()
+    }
+    
+    
+    // if no save, will simply place nodes in a single row
+    func placeNodesFromSave() {
+        
+        var placedNodes: [Node] = []
+        var curX: CGFloat = 0
+        modulesToPlace = patch?.parsedPatchFile?.modules ?? []
+        for module in modulesToPlace {
+            if isModuleVisible(module: module) {
+                let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
+                let nodePos = CGPoint(x: savedNode?.position.x ?? curX, y: savedNode?.position.y ?? 0)
+                let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
+                node.colorId = module.color
+                for block in module.input_blocks {
+                    node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                }
+                for block in module.output_blocks {
+                    node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
+                }
+                curX += NodeView.nodeWidth + NodeCanvas.column_spacing + randomOffset
+                placedNodes.append(node)
+            }
+        }
+        nodes = placedNodes
+    }
+    
+
+    func placeNodesSingleRow() {
+        var placedNodes: [Node] = []
+        var curX: CGFloat = 0
+        modulesToPlace = patch?.parsedPatchFile?.modules ?? []
+        for module in modulesToPlace {
+            if isModuleVisible(module: module) {
+                let nodePos = CGPoint(x: curX, y: 0)
+                let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
+                node.colorId = module.color
+                for block in module.input_blocks {
+                    node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                }
+                for block in module.output_blocks {
+                    node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
+                }
+                curX += NodeView.nodeWidth + 10
+                placedNodes.append(node)
+            }
+        }
+        nodes = placedNodes
+    }
+
+
+    func placeNodesRecursive() {
+        
+        // we start off by placing nodes in single row
+        placeNodesSingleRow()
+        placeConnections()
+        
+        nodeTable = [:]
+        moduleTable = [:]
+        // recursive methods starts at output node and recurses backwards from there
+        // step 1 - find the output module
+        
+        let output_node = nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 2 }) ??
+        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 95 }) ??
+        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 96 }) ??
+        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 60 })
+        
+        guard let output_node = output_node else { return }
+        
+        // step 2 - score nodes - calculates each nodes depth as well as num of rows per column
+        scoreNodes(rootNode: output_node)
+
+        // step 3 - place all unconnected nodes
+        var curX: CGFloat = randomOffset
+        var curY: CGFloat = randomOffset
+        var replaced_nodes: [Node] = []
+        let unplaced_nodes: [Bool:[Node]] = Dictionary.init(grouping: nodes, by: { node in
+            return node.depth == 0
+        })
+
+        // all unplaced_nodes are placed in column 0
+        for node in unplaced_nodes[true] ?? [] {
+            node.position.x = curX
+            node.position.y = curY + randomOffset
+            replaced_nodes.append(node)
+            curX += NodeView.nodeWidth + NodeCanvas.column_spacing + randomOffset
+        }
+        
+        // clear out nodeTable
+        for depth in 1...maxDepth {
+            nodeTable[depth] = []
+        }
+        // store nodes in dictionary of columns based on depth
+        for node in unplaced_nodes[false] ?? [] {
+            nodeTable[node.depth]?.append(node)
+        }
+        
+        // now sort each node in each column according to their row num
+        for depth in 1...maxDepth {
+            nodeTable[depth] = nodeTable[depth]?.sorted(by: { $0.row_num < $1.row_num })
+        }
+        
+        // now loop through all columns (depth) and each row within each column
+        curY = 300 + randomOffset
+        curX = randomOffset
+        for depth in (1...maxDepth).reversed() {
+            curY = 300 + randomOffset
+            for node in nodeTable[depth] ?? [] {
+                node.position.x = curX                  //CGFloat(column) * (NodeView.nodeWidth + NodeCanvas.column_spacing)
+                node.position.y = curY
+                curY += node.height + 50 + randomOffset
+            }
+            if nodeTable[depth]?.isEmpty == false {
+                curX += (NodeView.nodeWidth + NodeCanvas.column_spacing) + randomOffset
+            }
+        }
+        
+        for(_, values) in nodeTable {
+            for node in values {
+                replaced_nodes.append(node)
+            }
+        }
+        
+        nodes = replaced_nodes
+        
+    }
     
     func scoreLeft(node: Node, depth: Int) -> Set<Node> {
         
@@ -306,16 +485,10 @@ class NodeCanvas: ObservableObject {
         if ohShit > 5000 { print("we found a feedback loop - bailing..."); return node.allChildNodes }
 
         var rowNum: Int = 0
-        
-        
+
         switch layoutAlgorithm {
-            
-        case .investigation1:
+        case .recurseOnFeedback:
             if node.depth > 0 && depth > node.depth && !feedbackList.contains(node) {
-                
-                //node.depth = max(node.depth, depth)
-                //maxDepth = max(maxDepth, node.depth)
-                
                 if adjustmentRoot == nil {
                     adjustmentRoot = node
                 }
@@ -338,9 +511,6 @@ class NodeCanvas: ObservableObject {
                     maxDepth = max(maxDepth, childNode.depth)
                 }
             }
-        case .singleRow:
-            break
-            
         default:
             break
 
@@ -366,7 +536,6 @@ class NodeCanvas: ObservableObject {
                 }
             }
         }
-        
         return node.allChildNodes
     }
     
@@ -377,168 +546,22 @@ class NodeCanvas: ObservableObject {
         rootNode.allChildNodes = scoreLeft(node: rootNode, depth: 1)
         print("maxDepth = \(maxDepth)")
         print("totalNodes scored = \(nodes.count)")
-        for node in nodes {
-            print("\(node.name)[\(node.mod_idx)]: depth = \(node.depth), num_children = \(node.allChildNodes.count)")
-        }
-    }
-    
-    // if no save, will simply place nodes in a single row
-    func placeNodesFromSave() {
-        
-        var placedNodes: [Node] = []
-        var curX: CGFloat = 0
-        modulesToPlace = patch?.parsedPatchFile?.modules ?? []
-        for module in modulesToPlace {
-            if !self.hiddenModules.contains(where: { $0.rawValue == module.ref_mod_idx }) {
-                let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
-                let nodePos = CGPoint(x: savedNode?.position.x ?? curX, y: savedNode?.position.y ?? 0)
-                let node = Node(name: module.name ?? "", mod_idx: module.number, pos: nodePos)
-                node.colorId = module.color
-                for block in module.input_blocks {
-                    node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
-                }
-                for block in module.output_blocks {
-                    node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
-                }
-                curX += NodeView.nodeWidth + NodeCanvas.column_spacing
-                placedNodes.append(node)
-            }
-        }
-        nodes = placedNodes
-    }
-    
-    
-    func placeNodesSingleRow() {
-        var placedNodes: [Node] = []
-        var curX: CGFloat = 0
-        modulesToPlace = patch?.parsedPatchFile?.modules ?? []
-        for module in modulesToPlace {
-            
-            let nodePos = CGPoint(x: curX, y: 0)
-            let node = Node(name: module.name ?? "", mod_idx: module.number, pos: nodePos)
-            node.colorId = module.color
-            for block in module.input_blocks {
-                node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
-            }
-            for block in module.output_blocks {
-                node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
-            }
-            curX += NodeView.nodeWidth + 10
-            placedNodes.append(node)
-        }
-        nodes = placedNodes
-    }
-    
-    func updateFilteredNodes() {
-        placeNodesOrdered(useSavedNodes: true)
-    }
-
-    func placeNodesOrdered(useSavedNodes: Bool) {
-        
-        nodes = []
-        edges = []
-        
-        if useSavedNodes {
-            placeNodesFromSave()
-            
-        } else {
-            placeNodesSingleRow()
-        }
-        
-        placeConnections()
-        
-        // if we have loaded saved positions and we are not changing a layout algorithm, then we are done
-
-        if useSavedNodes && self.savedNodes != nil {
-            placeConnections()
-            return
-        }
-        
-        if layoutAlgorithm == .singleRow { return }
-        
-        // step 1 - find the output module
-        
-        let output_node = nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 2 }) ??
-        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 95 }) ??
-        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 96 }) ??
-        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 60 })
-        
-        
-        guard let output_node = output_node else { return }
-        
-
-        // step 2 - score nodes - calculates each nodes depth as well as num of rows per column
-        scoreNodes(rootNode: output_node)
-
-        // step 3 - place all unconnected nodes
-        var curX: CGFloat = 0
-        var curY: CGFloat = 0
-        var replaced_nodes: [Node] = []
-        let unplaced_nodes: [Bool:[Node]] = Dictionary.init(grouping: nodes, by: { node in
-            return node.depth == 0
-        })
-
-        // all unplaced_nodes are placed in column 0
-        for node in unplaced_nodes[true] ?? [] {
-            node.position.x = curX
-            node.position.y = curY
-            replaced_nodes.append(node)
-            curX += NodeView.nodeWidth + NodeCanvas.column_spacing
-        }
-        
-        // clear out nodeTable
-        for depth in 1...maxDepth {
-            nodeTable[depth] = []
-        }
-        // store nodes in dictionary of columns based on depth
-        for node in unplaced_nodes[false] ?? [] {
-            nodeTable[node.depth]?.append(node)
-        }
-        
-        // now sort each node in each column according to their row num
-        for depth in 1...maxDepth {
-            nodeTable[depth] = nodeTable[depth]?.sorted(by: { $0.row_num < $1.row_num })
-        }
-        
-        // now loop through all columns (depth) and each row within each column
-        curY = 300
-        curX = 0
-        for depth in (1...maxDepth).reversed() {
-            curY = 300
-            //let column = maxDepth - depth
-            for node in nodeTable[depth] ?? [] {
-                node.position.x = curX //CGFloat(column) * (NodeView.nodeWidth + NodeCanvas.column_spacing)
-                node.position.y = curY
-                curY += node.height + 50
-            }
-            if nodeTable[depth]?.isEmpty == false {
-                curX += (NodeView.nodeWidth + NodeCanvas.column_spacing)
-            }
-        }
-        
-        for(_, values) in nodeTable {
-            for node in values {
-                replaced_nodes.append(node)
-            }
-        }
-        
-        nodes = replaced_nodes
-
-        placeConnections()
-    }
-    
-    
-    // this is a first attempt at a dirt simple Node placement algorithm... no recursion, no scoring of node placement, no detection of crossed edges
-    // it's bad - but it is dirt simple and it works
-    func placeNodesV1() {
-        
-        modulesToPlace = patch?.parsedPatchFile?.modules ?? []
-//        // decided to do this during module import - helps Detail View buttons
-//        for var module in modulesToPlace {
-//            module.name = module.name ?? EmpressReference.shared.moduleList[module.ref_mod_idx.description]?.name ?? ""
+//        for node in nodes {
+//            print("\(node.name)[\(node.mod_idx)]: depth = \(node.depth), num_children = \(node.allChildNodes.count)")
 //        }
+    }
+    
+    
+    // this method puts all nodes with no inputs in 1st column and completes layout following output->input
+    // no recursion, no scoring of node placement, no detection of crossed edges
+    // it's bad - but it is dirt simple and it works
+    func placeNodesInputToOutput() {
         
-        var we_got_a_problem: Int = 0
+        nodeTable = [:]
+        moduleTable = [:]
+        modulesToPlace = patch?.parsedPatchFile?.modules ?? []
+        nodeProcessingState = .initialColumn(nextYOffset: NodeCanvas.row0_y)
+        
         while modulesToPlace.count > 0 {
             
             switch nodeProcessingState {
@@ -556,23 +579,30 @@ class NodeCanvas: ObservableObject {
                 nodeTable[NodeCanvas.lastColIndex] = []
                 moduleTable[NodeCanvas.lastColIndex] = []
                 
+                let num_modules_no_input = no_input_modules[true]?.count ?? 0
+                let num_modules_with_input = no_input_modules[false]?.count ?? 0
+
                 var curY: CGFloat = nextYOffset
                 for module in no_input_modules[true] ?? [] {
-                    moduleTable[0]?.append(module)
                     
-                    let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
-                    let nodePos = CGPoint(x: savedNode?.position.x ?? NodeCanvas.col0_x, y: savedNode?.position.y ?? curY)
-                    //let node = Node(name: module.name ?? "", mod_idx: module.number, pos: CGPoint(x: NodeCanvas.col0_x, y: curY))
-                    let node = Node(name: module.name ?? "", mod_idx: module.number, pos: nodePos)
-                    node.colorId = module.color
-                    for block in module.input_blocks {
-                        node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                    if isModuleVisible(module: module) {
+                        moduleTable[0]?.append(module)
+                        
+                        let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
+                        let nodePos = CGPoint(x: savedNode?.position.x ?? NodeCanvas.col0_x, y: savedNode?.position.y ?? curY)
+                        //let node = Node(name: module.name ?? "", mod_idx: module.number, pos: CGPoint(x: NodeCanvas.col0_x, y: curY))
+                        let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
+                        node.colorId = module.color
+                        for block in module.input_blocks {
+                            node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                        }
+                        for block in module.output_blocks {
+                            node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
+                        }
+                        nodeTable[0]?.append(node)
+                        curY += (node.height + 50 + randomOffset)
                     }
-                    for block in module.output_blocks {
-                        node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
-                    }
-                    nodeTable[0]?.append(node)
-                    curY += (node.height + 30)
+
                 }
                 
                 
@@ -589,19 +619,23 @@ class NodeCanvas: ObservableObject {
                 curY = nextYOffset
                 
                 for module in no_ouput_modules[true] ?? [] {
-                    moduleTable[NodeCanvas.lastColIndex]?.append(module)
-                    let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
-                    let nodePos = CGPoint(x: savedNode?.position.x ?? NodeCanvas.col5_x, y: savedNode?.position.y ?? curY)
-                    let node = Node(name: module.name ?? "", mod_idx: module.number, pos: nodePos)
-                    node.colorId = module.color
-                    for block in module.input_blocks {
-                        node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                    
+                    if isModuleVisible(module: module) {
+                        moduleTable[NodeCanvas.lastColIndex]?.append(module)
+                        let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
+                        let nodePos = CGPoint(x: savedNode?.position.x ?? NodeCanvas.col5_x, y: savedNode?.position.y ?? curY)
+                        let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
+                        node.colorId = module.color
+                        for block in module.input_blocks {
+                            node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                        }
+                        for block in module.output_blocks {
+                            node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
+                        }
+                        nodeTable[NodeCanvas.lastColIndex]?.append(node)
+                        curY += (node.height + 50 + randomOffset)
                     }
-                    for block in module.output_blocks {
-                        node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
-                    }
-                    nodeTable[NodeCanvas.lastColIndex]?.append(node)
-                    curY += (node.height + 30)
+
                 }
                 
                 modulesToPlace = no_ouput_modules[false] ?? []
@@ -611,8 +645,8 @@ class NodeCanvas: ObservableObject {
                 
                 nodeTable[column] = []
                 moduleTable[column] = []
-                var curY: CGFloat = nextYOffset
                 
+                var curY: CGFloat = nextYOffset
                 let prevColModules = moduleTable[column - 1] ?? []
                 let prevColModIdx = Set(prevColModules.map { $0.number })
                 
@@ -626,30 +660,25 @@ class NodeCanvas: ObservableObject {
                 }
                 
                 for module in columnGrouping[true] ?? [] {
-                    
-                    moduleTable[column]?.append(module)
-                    let alg_x = NodeCanvas.col0_x + (NodeView.nodeWidth + NodeCanvas.column_spacing) * CGFloat(column)
-                    let alg_y = curY
-                    let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
-                    let nodePos = CGPoint(x: savedNode?.position.x ?? alg_x, y: savedNode?.position.y ?? alg_y)
-                    let node = Node(name: module.name ?? "", mod_idx: module.number, pos: nodePos)
-                    node.colorId = module.color
-                    for block in module.input_blocks {
-                        node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                    if isModuleVisible(module: module) {
+                        moduleTable[column]?.append(module)
+                        let alg_x = NodeCanvas.col0_x + (NodeView.nodeWidth + NodeCanvas.column_spacing) * CGFloat(column)
+                        let alg_y = curY
+                        let nodePos = CGPoint(x: alg_x, y: alg_y)
+                        let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
+                        node.colorId = module.color
+                        for block in module.input_blocks {
+                            node.createAndAppendPort(portType: .input, name: block.keys.first ?? "")
+                        }
+                        for block in module.output_blocks {
+                            node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
+                        }
+                        nodeTable[column]?.append(node)
+                        curY += (node.height + 50 + randomOffset)
                     }
-                    for block in module.output_blocks {
-                        node.createAndAppendPort(portType: .output, name: block.keys.first ?? "")
-                    }
-                    nodeTable[column]?.append(node)
-                    curY += (node.height + 30)
                 }
                 modulesToPlace = columnGrouping[false] ?? []
                 nodeProcessingState = .arbitraryColumn(column: column + 1, nextYOffset: NodeCanvas.row0_y)
-            }
-            
-            we_got_a_problem += 1
-            if we_got_a_problem > 200 {
-                modulesToPlace = []
             }
         }
         
@@ -666,5 +695,60 @@ class NodeCanvas: ObservableObject {
                 nodes.append(node)
             }
         }
+    }
+
+    
+    func placeConnections() {
+        
+        clearConnections()
+        for blockConnection in patch?.parsedPatchFile?.blockConnections ?? [] {
+            
+            guard let srcNode = self.nodes.first(where: { $0.mod_idx == blockConnection.source_module_idx }) else { continue }
+            
+            var dstNode: Node?
+            
+            dstNode = self.nodes.first(where: { $0.mod_idx == blockConnection.dest_module_idx })
+            /*
+            // check for Audio Output
+            if let dstModIdx = blockConnection.dest_module_idx, let dstModule = patch?.parsedPatchFile?.modules[dstModIdx] {
+                if dstModule.ref_mod_idx == 2 {
+                    dstNode = nodes.first(where: { $0.ref_mod_idx == 2 })
+                } else {
+                    dstNode = self.nodes.first(where: { $0.mod_idx == blockConnection.dest_module_idx })
+                }
+            }
+            */
+            
+            guard let dstNode = dstNode else { continue }
+
+            guard let srcPortIndex = blockConnection.source_block_idx else { continue }
+            guard let destPortIndex = blockConnection.dest_block_idx else { continue }
+            guard let srcPort = srcNode.outputs.item(at: srcPortIndex) else  { continue }
+            guard let dstPort = dstNode.inputs.item(at: destPortIndex) else {continue }
+            
+            let srcConnection = NodeConnection(node: srcNode, port: srcPort)
+            let endConnection = NodeConnection(node: dstNode, port: dstPort)
+            
+            _ = srcPort.connectTo(dstPort)
+            _ = dstPort.connectTo(srcPort)
+            let edge = Edge(src: srcConnection, dst: endConnection, strength: 100)
+            self.edges.append(edge)
+
+        }
+    }
+    
+    
+    
+    func clearConnections() {
+        for node in nodes {
+            for input in node.inputs {
+                input.connections = []
+            }
+            for output in node.outputs {
+                output.connections = []
+            }
+        }
+        
+        self.edges = []
     }
 }
