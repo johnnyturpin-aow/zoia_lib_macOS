@@ -51,8 +51,8 @@ class Edge: ObservableObject, Identifiable {
         startPoint = CGPoint(x: sx, y: sy)
         endPoint = CGPoint(x: dx, y: dy)
         
-        isAudio = srcConnection.port.name.contains("audio") || dstConnection.port.name.contains("audio") || srcConnection.port.name == "output_L" || srcConnection.port.name == "output_R" || dstConnection.port.name == "input_L" || dstConnection.port.name == "input_R"
-
+        //isAudio = srcConnection.port.name.contains("audio") || dstConnection.port.name.contains("audio") || srcConnection.port.name == "output_L" || srcConnection.port.name == "output_R" || dstConnection.port.name == "input_L" || dstConnection.port.name == "input_R"
+        isAudio = srcConnection.port.isAudioPort || dstConnection.port.isAudioPort
     }
 }
 

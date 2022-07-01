@@ -19,7 +19,7 @@ struct NodeViewCommands: Commands {
                 Text(LayoutAlgorithm.simple.rawValue).tag(LayoutAlgorithm.simple)
                 Text(LayoutAlgorithm.simpleRecursive.rawValue).tag(LayoutAlgorithm.simpleRecursive)
                 Text(LayoutAlgorithm.moveChildNodes.rawValue).tag(LayoutAlgorithm.moveChildNodes)
-                Text(LayoutAlgorithm.recurseOnFeedback.rawValue).tag(LayoutAlgorithm.recurseOnFeedback)
+                Text(LayoutAlgorithm.splitAudioCV.rawValue).tag(LayoutAlgorithm.splitAudioCV)
             }
         }
     }

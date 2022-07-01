@@ -155,6 +155,11 @@ class Port: Identifiable {
         connections.append(port)
         return true
     }
+    
+    var isAudioPort: Bool {
+        //isAudio = srcConnection.port.name.contains("audio") || dstConnection.port.name.contains("audio") || srcConnection.port.name == "output_L" || srcConnection.port.name == "output_R" || dstConnection.port.name == "input_L" || dstConnection.port.name == "input_R"
+        return name.contains("audio") || name == "output_L" || name == "output_R" || name == "input_L" || name == "input_R"
+    }
 }
 
 

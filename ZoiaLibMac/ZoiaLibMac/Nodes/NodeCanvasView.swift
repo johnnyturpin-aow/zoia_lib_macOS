@@ -121,9 +121,7 @@ struct NodeCanvasView: View {
         .navigationTitle(nodeCanvas.patch?.parsedPatchFile?.name ?? "Node Editor")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-
                 HStack {
-                    
                     Text("Layout Algorithm")
                     Picker("Layout Algorithm", selection: $nodeCanvas.layoutAlgorithm) {
                         HStack {
@@ -143,9 +141,9 @@ struct NodeCanvasView: View {
                             Image(systemName: LayoutAlgorithm.moveChildNodes.image)
                         }.tag(LayoutAlgorithm.moveChildNodes)
                         HStack {
-                            Text(LayoutAlgorithm.recurseOnFeedback.rawValue)
-                            Image(systemName: LayoutAlgorithm.recurseOnFeedback.image)
-                        }.tag(LayoutAlgorithm.recurseOnFeedback)
+                            Text(LayoutAlgorithm.splitAudioCV.rawValue)
+                            Image(systemName: LayoutAlgorithm.splitAudioCV.image)
+                        }.tag(LayoutAlgorithm.splitAudioCV)
                     }
                     .onChange(of: nodeCanvas.layoutAlgorithm, perform: { newLayout in
                         nodeCanvas.updateLayout(newLayout: newLayout)
@@ -186,7 +184,6 @@ struct NodeCanvasView: View {
                         })
                         .help(module.description)
                     }
-                    
                     Spacer()
                 }
                 HStack {

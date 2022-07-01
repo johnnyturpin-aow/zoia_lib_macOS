@@ -57,7 +57,7 @@ enum LayoutAlgorithm: String, Codable, Identifiable {
     case simple = "Compact"
     case simpleRecursive = "Recursive 1"
     case moveChildNodes = "Recursive 2"
-    case recurseOnFeedback = "Recursive 3"
+    case splitAudioCV = "Split Audio / CV"
 
     var id: String { return rawValue }
     
@@ -72,8 +72,8 @@ enum LayoutAlgorithm: String, Codable, Identifiable {
             return "1.square"
         case .moveChildNodes:
             return "2.square"
-        case .recurseOnFeedback:
-            return "3.square"
+        case .splitAudioCV:
+            return "square.grid.3x1.below.line.grid.1x2"
         }
     }
     
@@ -90,7 +90,8 @@ enum HidableModules: Int, Codable, Identifiable, CaseIterable {
     case valueInput = 45
     case uiButton = 56
     case pixel = 81
-    case connections = 9999
+    case audioConnections = 9999
+    case cvConnections = 8888
     
     var id: Int { rawValue }
     
@@ -101,7 +102,8 @@ enum HidableModules: Int, Codable, Identifiable, CaseIterable {
         case .pushButton: return "Push Button"
         case .uiButton: return "UI Button"
         case .valueInput: return "Value"
-        case .connections: return "Connections"
+        case .audioConnections: return "Audio Connection"
+        case .cvConnections: return "CV Connection"
         }
     }
     
@@ -117,10 +119,18 @@ enum HidableModules: Int, Codable, Identifiable, CaseIterable {
             return "square.grid.3x3.topleft.filled"
         case .pixel:
             return "squareshape.dashed.squareshape"
-        case .connections:
+        case .audioConnections:
+            return "waveform"
+        case .cvConnections:
             return "point.topleft.down.curvedto.point.bottomright.up.fill"
         }
     }
+}
+
+enum SplitModeLayoutState {
+    case audio
+    case cv
+    case unplaced
 }
 
 class NodeCanvas: ObservableObject {
@@ -148,15 +158,20 @@ class NodeCanvas: ObservableObject {
     static let column_spacing: CGFloat = 300
     // Int is the column - the array of node are the nodes down that column
     @Published var selection: SelectionHandler
-    @Published var zoomScale: CGFloat = 1.0
+    @Published var zoomScale: CGFloat = 1.0 {
+        didSet {
+            let scaleDiff = oldValue - zoomScale
+            
+            self.portalPosition.x = self.portalPosition.x + self.portalPosition.x * scaleDiff
+            self.portalPosition.y = self.portalPosition.y + self.portalPosition.y * scaleDiff
+        }
+    }
     @Published var portalPosition: CGPoint = .zero
     @Published var dragOffset: CGSize = .zero
     var viewSize: CGSize = .zero
     @Published var isDraggingNode: Bool = false
     @Published var isDraggingCanvas: Bool = false
-    
     @Published var isDraggingSelectionRect: Bool = false
-    
     @Published var selectionRect: CGRect = .zero {
         didSet {
             if isDraggingSelectionRect {
@@ -187,13 +202,18 @@ class NodeCanvas: ObservableObject {
     func updateConnectionStyle(newStyle: PipeType) {
         self.connectionStyle = newStyle
         self.edges = []
-        if !self.hiddenModules.contains(.connections) {
+        
+        if hiddenModules.contains(.audioConnections) && hiddenModules.contains(.cvConnections) {
+            print("hiding all connections")
+        } else {
             self.placeConnections()
-            self.throttledSaveCanvas()
         }
+        
+        self.throttledSaveCanvas()
+
     }
     
-    @Published var layoutAlgorithm: LayoutAlgorithm = .moveChildNodes
+    @Published var layoutAlgorithm: LayoutAlgorithm = .splitAudioCV
     func updateLayout(newLayout: LayoutAlgorithm) {
         self.layoutAlgorithm = newLayout
         if self.patch != nil {
@@ -201,6 +221,14 @@ class NodeCanvas: ObservableObject {
             self.throttledSaveCanvas()
         }
     }
+    
+    var splitModeLayoutState: SplitModeLayoutState = .audio
+    
+    var audioNodes: Set<Node> = []
+    var cvNodes: Set<Node> = []
+    var finishedNodes: Set<Node> = []
+    var minRowForColumn: [Int:Int] = [:]
+    var maxRowForColumn: [Int: Int] = [:]
 
     var nodeProcessingState: NodeProcessingState = .initialColumn(nextYOffset: NodeCanvas.row0_y)
     var modulesToPlace: [ParsedBinaryPatch.Module] = []
@@ -211,10 +239,9 @@ class NodeCanvas: ObservableObject {
     
     // v2 node layout algorithm
     var maxDepth: Int = 0
-    var maxNumRows: Int = 0
     var ohShit: Int = 0
     
-    let dontSave = false
+    let dontSave = true
     
     var nodeListSaveTimer: Timer?
 
@@ -234,9 +261,7 @@ class NodeCanvas: ObservableObject {
         nodeListSaveTimer?.invalidate()
         nodeListSaveTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) {
             [weak self] timer in
-            if self?.dontSave == false  {
-                self?.saveCanvas()
-            }
+            self?.saveCanvas()
             self?.nodeListSaveTimer = nil
         }
     }
@@ -269,6 +294,7 @@ class NodeCanvas: ObservableObject {
                 _ in
                 self.placeNodes(useSavedNodes: true)
                 self.saveCanvas()
+                
             }
         }
     }
@@ -302,7 +328,8 @@ class NodeCanvas: ObservableObject {
     }
     
     private func saveCanvas(completion: (()->Void)? = nil) {
-        guard let bundleUrl = self.bundlePath else { return }
+        guard dontSave == false else { completion?(); return }
+        guard let bundleUrl = self.bundlePath else { completion?(); return }
         let nodeCanvasCodable = NodeCanvasCodable(nodeCanvas: self)
         self.loadedNodeCodableList = nodeCanvasCodable.nodeList
         print("saving canvas")
@@ -360,26 +387,32 @@ class NodeCanvas: ObservableObject {
         var maxX: CGFloat = .leastNonzeroMagnitude
         var maxY: CGFloat = .leastNonzeroMagnitude
         
-        var tlNode: Node?
-        var brNode: Node?
         for node in nodes {
-            if node.position.x < minX || node.position.y < minY {
-                tlNode = node
-            }
-            if (node.position.x + NodeView.nodeWidth) > maxX || (node.position.y + node.height) > maxY {
-                brNode = node
-            }
+//            if node.position.x < minX || node.position.y < minY {
+//                tlNode = node
+//            }
+//            if (node.position.x + NodeView.nodeWidth) > maxX || (node.position.y + node.height) > maxY {
+//                brNode = node
+//            }
             minX = min(minX, node.position.x)
             minY = min(minY, node.position.y)
             maxX = max(node.position.x + NodeView.nodeWidth, maxX)
             maxY = max(node.position.y + node.height, maxY)
         }
         
-        self.portalPosition.x = minX + viewSize.width * 0.05
-        self.portalPosition.y = minY + viewSize.height * 0.05
+
         
         let totalWidth = maxX - minX
         let totalHeight = maxY - minY
+        
+        print("minX = \(minX)")
+        print("maxX = \(maxX)")
+        print("minY = \(minY)")
+        print("maxY = \(maxY)")
+        print("view.width = \(self.viewSize.width)")
+        print("view.height = \(self.viewSize.height)")
+        print("totalWidth = \(totalWidth)")
+        print("totalHeight = \(totalHeight)")
         
         if viewSize.width > 0 && viewSize.height > 0 && totalWidth > 0 && totalHeight > 0 {
             let neededZoomForWidth = self.viewSize.width / totalWidth
@@ -390,6 +423,11 @@ class NodeCanvas: ObservableObject {
                 zoomScale = targetZoom - 0.05
             }
         }
+        
+        //self.portalPosition.x = (minX * zoomScale * -1.0) + totalWidth * 0.05
+        //self.portalPosition.y = (minY * zoomScale * -1.0) + (totalHeight / 4.0)
+        portalPosition.x = 0
+        portalPosition.y = 0
     }
     
     func placeNodes(useSavedNodes: Bool) {
@@ -402,7 +440,9 @@ class NodeCanvas: ObservableObject {
             print("we are placing nodes using saved positions...")
             placeNodesUsingSavedPos()
             // placing connections is always last
-            if !hiddenModules.contains(.connections) {
+            if hiddenModules.contains(.audioConnections) && hiddenModules.contains(.cvConnections) {
+                print("hiding all connections")
+            } else {
                 placeConnections()
             }
         } else {
@@ -417,13 +457,15 @@ class NodeCanvas: ObservableObject {
                 layoutNodesRecursive()
             case .moveChildNodes:
                 layoutNodesRecursive()
-            case .recurseOnFeedback:
-                layoutNodesRecursive()
+            case .splitAudioCV:
+                layoutNodesSplitAudioCV()
             case .singleRow:
                 layoutNodesInSingleRow()
             }
             // placing connections is always last
-            if !hiddenModules.contains(.connections) {
+            if hiddenModules.contains(.audioConnections) && hiddenModules.contains(.cvConnections) {
+                print("hiding all connections")
+            } else {
                 placeConnections()
             }
             
@@ -459,6 +501,14 @@ class NodeCanvas: ObservableObject {
     
 
     func layoutNodesInSingleRow() {
+
+        for node in nodes {
+            node.depth = 0
+            node.position.x = 0
+            node.position.y = 0
+            node.allChildNodes = []
+            node.row_num = 0
+        }
         var placedNodes: [Node] = []
         var curX: CGFloat = 0
         modulesToPlace = patch?.parsedPatchFile?.modules ?? []
@@ -479,6 +529,220 @@ class NodeCanvas: ObservableObject {
         }
         nodes = placedNodes
     }
+    
+    func layoutNodesSplitAudioCV() {
+
+
+        finishedNodes = []
+        layoutNodesInSingleRow()
+        placeConnections()
+        
+        nodeTable = [:]
+        moduleTable = [:]
+        // recursive methods starts at output node and recurses backwards from there
+        // step 1 - find the output module
+        maxDepth = 0
+        minRowForColumn = [:]
+        maxRowForColumn = [:]
+        audioNodes = []
+        cvNodes = []
+        
+        let output_node = nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 2 }) ??
+        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 95 }) ??
+        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 96 }) ??
+        nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 60 })
+        
+        guard let output_node = output_node else { return }
+        
+        print("audioNode layout pass...")
+        splitModeLayoutState = .audio
+        // score audio nodes first
+        scoreNodes(rootNode: output_node)
+        
+        
+        print("cvNode layout pass...")
+        splitModeLayoutState = .cv
+
+        // now place cv nodes releative to each audio node
+        for node in audioNodes {
+            node.allChildNodes = []
+            for input in node.inputs {
+                for port in input.connections.filter({ $0.isAudioPort == false }) {
+                    let leftNode = port.parentNode
+                    if !node.allChildNodes.contains(leftNode) {
+                        node.allChildNodes.insert(leftNode)
+                        node.allChildNodes = node.allChildNodes.union(scoreLeft(node: leftNode, depth: node.depth + 1))
+                    }
+                }
+            }
+        }
+
+        // step 3 - place all unconnected nodes
+        var curX: CGFloat = randomOffset
+        var curY: CGFloat = randomOffset
+
+
+        print("num Audio Nodes = \(audioNodes.count)")
+        print("num CV Nodes = \(cvNodes.count)")
+        curY = 0
+        // all cv Nodes are placed up from 0 (negative Y)
+        
+        for depth in 1...maxDepth {
+            nodeTable[depth] = []
+        }
+        
+        for node in cvNodes {
+            nodeTable[node.depth]?.append(node)
+        }
+        for depth in 1...maxDepth {
+            nodeTable[depth] = nodeTable[depth]?.sorted(by: { $0.row_num > $1.row_num })
+            minRowForColumn[depth] = nodeTable[depth]?.last?.row_num ?? 0
+        }
+        
+        // now loop through all columns (depth) and each row within each column
+        curY = NodeCanvas.row0_y + randomOffset
+        curX = randomOffset
+        for depth in (1...maxDepth).reversed() {
+            curY = NodeCanvas.row0_y + randomOffset
+            for node in nodeTable[depth] ?? [] {
+                curY -= (node.height + 50)
+                node.position.x = curX
+                node.position.y = curY
+            }
+            curX += (NodeView.nodeWidth + NodeCanvas.column_spacing) + randomOffset
+        }
+        
+        for depth in 1...maxDepth {
+            nodeTable[depth] = []
+        }
+        for node in audioNodes {
+            nodeTable[node.depth]?.append(node)
+        }
+        for depth in 1...maxDepth {
+            nodeTable[depth] = nodeTable[depth]?.sorted(by: { $0.row_num < $1.row_num })
+            minRowForColumn[depth] = nodeTable[depth]?.first?.row_num ?? 0
+        }
+        curY = NodeCanvas.row0_y + randomOffset
+        curX = randomOffset
+        for depth in (1...maxDepth).reversed() {
+            curY = NodeCanvas.row0_y + randomOffset
+            for node in nodeTable[depth] ?? [] {
+                node.position.x = curX
+                node.position.y = curY
+                curY += node.height + 50
+            }
+            curX += (NodeView.nodeWidth + NodeCanvas.column_spacing) + randomOffset
+            
+        }
+        
+        var minX: CGFloat = .greatestFiniteMagnitude
+        for node in nodes {
+            minX = min(minX, node.position.x)
+        }
+        
+        for depth in 1...maxDepth {
+            nodeTable[depth] = []
+        }
+
+        // loop through all currently placed nodes and check if they are connected to any unplaced nodes
+        var numUnplacedNodes: Int = 0
+        curY = 0
+        for node in nodes {
+            for input in node.inputs {
+                for port in input.connections {
+                    let leftNode = port.parentNode
+                    if leftNode.depth == 0 {
+                        numUnplacedNodes += 1
+                        
+                        finishedNodes.insert(leftNode)
+                        leftNode.depth = node.depth + 1
+                        
+                        let minRow = minRowForColumn[leftNode.depth] ?? leftNode.row_num
+                        leftNode.row_num = minRow - 1
+                        minRowForColumn[leftNode.depth] = min(leftNode.row_num, minRow)
+                        nodeTable[leftNode.depth]?.append(leftNode)
+                    }
+                }
+            }
+            for output in node.outputs {
+                for port in output.connections {
+                    let rightNode = port.parentNode
+                    if rightNode.depth == 0 {
+                        finishedNodes.insert(rightNode)
+                        numUnplacedNodes += 1
+                        rightNode.depth = node.depth - 1
+                        let minRow = minRowForColumn[rightNode.depth] ?? rightNode.row_num
+                        rightNode.row_num = minRow - 1
+                        minRowForColumn[rightNode.depth] = min(rightNode.row_num, minRow)
+                        nodeTable[rightNode.depth]?.append(rightNode)
+                    }
+                }
+            }
+        }
+        
+        
+        for depth in 1...maxDepth {
+            nodeTable[depth] = nodeTable[depth]?.sorted(by: { $0.row_num < $1.row_num })
+            minRowForColumn[depth] = nodeTable[depth]?.first?.row_num ?? 0
+        }
+        curY = NodeCanvas.row0_y + randomOffset
+        curX = randomOffset
+        for depth in (1...maxDepth).reversed() {
+            curY = NodeCanvas.row0_y + randomOffset
+            for node in nodeTable[depth] ?? [] {
+                curY -= node.height + 50
+                node.position.x = curX
+                node.position.y = curY
+            }
+            curX += (NodeView.nodeWidth + NodeCanvas.column_spacing) + randomOffset
+            
+        }
+        
+        print("num unplaced nodes = \(numUnplacedNodes)")
+        print("nodes.count = \(nodes.count)")
+        print("finishedNodes.count = \(finishedNodes.count)")
+        
+//        curY = NodeCanvas.row0_y
+//        curX = randomOffset
+//        for node in unplacedNodes {
+//            node.position.x = node.position.x = curX
+//            node.position.y = (node.height + 30) * CGFloat(node.row_num)
+//        }
+//        for node in unplaced_nodes[true] ?? [] {
+//            node.position.x = minX - NodeView.nodeWidth - 100
+//            node.position.y = curY
+//            curY += node.height + 30
+//        }
+//
+
+        // now move single outputs into place (Zebu Audio Outs + HP out)
+        // Zebu Audio Outs are single outs but they should be placed as a pair
+        if output_node.ref_mod_idx == 95 {
+            // find the other node for the output pair
+            if let otherNode = nodes.first(where: { $0.ref_mod_idx == 96 }) {
+                otherNode.position.x = output_node.position.x
+                otherNode.position.y = output_node.position.y + output_node.height + 30
+                curY = otherNode.position.y + otherNode.height + 30
+            }
+        }
+        if output_node.ref_mod_idx == 96 {
+            if let otherNode = nodes.first(where: { $0.ref_mod_idx == 95 }) {
+                otherNode.position.x = output_node.position.x
+                otherNode.position.y = output_node.position.y + output_node.height + 30
+                curY = otherNode.position.y + otherNode.height + 30
+            }
+        }
+        // move EuroBuro HP output to the output column
+        if let hpNode = nodes.first(where: { $0.ref_mod_idx == 92 }) {
+            hpNode.position.x = output_node.position.x
+            hpNode.position.y = curY
+        }
+        
+        nodes = nodes.sorted(by: { $0.position.x < $1.position.x })
+
+        // remove connections we used for positioning
+        edges = []
+    }
 
 
     func layoutNodesRecursive() {
@@ -487,8 +751,14 @@ class NodeCanvas: ObservableObject {
         layoutNodesInSingleRow()
         placeConnections()
         
+        minRowForColumn = [:]
+        maxRowForColumn = [:]
         nodeTable = [:]
         moduleTable = [:]
+        finishedNodes = []
+        maxDepth = 0
+        minRowForColumn = [:]
+        maxRowForColumn = [:]
         // recursive methods starts at output node and recurses backwards from there
         // step 1 - find the output module
         
@@ -538,13 +808,11 @@ class NodeCanvas: ObservableObject {
         for depth in (1...maxDepth).reversed() {
             curY = NodeCanvas.row0_y + randomOffset
             for node in nodeTable[depth] ?? [] {
-                node.position.x = curX                  //CGFloat(column) * (NodeView.nodeWidth + NodeCanvas.column_spacing)
-                node.position.y = curY
-                curY += node.height + 50 + randomOffset
+                node.position.x = curX
+                node.position.y = CGFloat(node.row_num) * (node.height + 50)
             }
-            if nodeTable[depth]?.isEmpty == false {
-                curX += (NodeView.nodeWidth + NodeCanvas.column_spacing) + randomOffset
-            }
+            curX += (NodeView.nodeWidth + NodeCanvas.column_spacing) + randomOffset
+
         }
         
         // now move single outputs into place (Zebu Audio Outs + HP out)
@@ -590,26 +858,9 @@ class NodeCanvas: ObservableObject {
         ohShit += 1
         if ohShit > 5000 { print("we found a feedback loop - bailing..."); return node.allChildNodes }
 
-        var rowNum: Int = 0
-
         switch layoutAlgorithm {
-        case .recurseOnFeedback:
-            if node.depth > 0 && depth > node.depth && !feedbackList.contains(node) {
-                if adjustmentRoot == nil {
-                    adjustmentRoot = node
-                }
-                feedbackList.insert(node)
-                for input in node.inputs {
-                    for port in input.connections {
-                        let leftNode = port.parentNode
-                        scoreLeft(node: leftNode, depth: depth + 1)
-                    }
-                }
-            }
-            if node == adjustmentRoot {
-                adjustmentRoot = nil
-                feedbackList = []
-            }
+        case .splitAudioCV:
+            break
         case .moveChildNodes:
             if node.depth > 0 && depth > node.depth {
                 let depthDiff = depth - node.depth
@@ -624,19 +875,61 @@ class NodeCanvas: ObservableObject {
             break
 
         }
+        
+        finishedNodes.insert(node)
 
         node.depth = max(node.depth, depth)
         maxDepth = max(maxDepth, node.depth)
+        
+        if layoutAlgorithm == .splitAudioCV {
+            switch splitModeLayoutState {
+            case .audio:
+                let maxRowForThisNode = maxRowForColumn[node.depth] ?? 0
+                node.row_num = maxRowForThisNode
+                maxRowForColumn[node.depth] = max(node.row_num + 1, maxRowForThisNode)
+                
+                audioNodes.insert(node)
+                for input in node.inputs {
+                    for port in input.connections.filter({ $0.isAudioPort == true }) {
+                        let leftNode = port.parentNode
+                        
+                        if !node.allChildNodes.contains(leftNode) {
+                            node.allChildNodes.insert(leftNode)
+                            node.allChildNodes = node.allChildNodes.union(scoreLeft(node: leftNode, depth: depth + 1))
+                        }
+                    }
+                }
+            case .cv:
+                
+                let minRowForThisNode = minRowForColumn[node.depth] ?? 0
+                node.row_num = minRowForThisNode - 1
+                minRowForColumn[node.depth] = min(node.row_num, minRowForThisNode)
+                cvNodes.insert(node)
+                for input in node.inputs {
+                    for port in input.connections.filter({ $0.isAudioPort == false }) {
+                        let leftNode = port.parentNode
+                        if !node.allChildNodes.contains(leftNode) {
+                            node.allChildNodes.insert(leftNode)
+                            node.allChildNodes = node.allChildNodes.union(scoreLeft(node: leftNode, depth: depth + 1))
+                        }
+                    }
+                }
+            case .unplaced:
+                break
+            }
+        } else {
+            
+            let maxRowForThisNode = maxRowForColumn[node.depth] ?? 0
+            node.row_num = maxRowForThisNode
+            maxRowForColumn[node.depth] = max(node.row_num + 1, maxRowForThisNode)
 
-        for input in node.inputs {
-            for port in input.connections {
-                let leftNode = port.parentNode
-                if !node.allChildNodes.contains(leftNode) {
-                    node.allChildNodes.insert(leftNode)
-                    leftNode.row_num = rowNum
-                    maxNumRows = max(maxNumRows, rowNum)
-                    node.allChildNodes = node.allChildNodes.union(scoreLeft(node: leftNode, depth: depth + 1))
-                    rowNum += 1
+            for input in node.inputs {
+                for port in input.connections {
+                    let leftNode = port.parentNode
+                    if !node.allChildNodes.contains(leftNode) {
+                        node.allChildNodes.insert(leftNode)
+                        node.allChildNodes = node.allChildNodes.union(scoreLeft(node: leftNode, depth: depth + 1))
+                    }
                 }
             }
         }
@@ -645,14 +938,8 @@ class NodeCanvas: ObservableObject {
     
     
     func scoreNodes(rootNode: Node) {
-        
         // node level > 1 are placed nodes - node level == 0 is an unplaced node
         rootNode.allChildNodes = scoreLeft(node: rootNode, depth: 1)
-        print("maxDepth = \(maxDepth)")
-        print("totalNodes scored = \(nodes.count)")
-//        for node in nodes {
-//            print("\(node.name)[\(node.mod_idx)]: depth = \(node.depth), num_children = \(node.allChildNodes.count)")
-//        }
     }
     
     
@@ -817,9 +1104,18 @@ class NodeCanvas: ObservableObject {
             
             _ = srcPort.connectTo(dstPort)
             _ = dstPort.connectTo(srcPort)
-            let edge = Edge(src: srcConnection, dst: endConnection, strength: 100)
-            self.edges.append(edge)
 
+            let edge = Edge(src: srcConnection, dst: endConnection, strength: 100)
+            
+            if srcPort.isAudioPort || dstPort.isAudioPort {
+                if !hiddenModules.contains(.audioConnections) {
+                    self.edges.append(edge)
+                }
+            } else {
+                if !hiddenModules.contains(.cvConnections) {
+                    self.edges.append(edge)
+                }
+            }
         }
     }
     
