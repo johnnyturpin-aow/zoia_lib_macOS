@@ -33,6 +33,7 @@ struct NodeCanvasView: View {
                 let targetZoomScale = nodeCanvas.zoomScale + (CGFloat(event?.deltaY ?? 0) / 16)
                 nodeCanvas.zoomScale = max(targetZoomScale, NodeCanvas.minZoomScale)
                 nodeCanvas.dragChange += 1
+                nodeCanvas.throttledSaveCanvas()
             }
             .store(in: &subs)
     }
@@ -82,6 +83,7 @@ struct NodeCanvasView: View {
                 .onEnded {
                     value in
                     self.onDraggingEnded(value)
+                    nodeCanvas.throttledSaveCanvas()
                 })
             .gesture(DragGesture()
                 .modifiers(.command)
@@ -93,12 +95,14 @@ struct NodeCanvasView: View {
                     let targetZoomScale = nodeCanvas.zoomScale - largestChange / 1000
                     nodeCanvas.zoomScale = max(targetZoomScale, NodeCanvas.minZoomScale)
                     nodeCanvas.dragChange += 1
+                    
                 }
                 .onEnded {
                     value in
                     let targetZoomScale = nodeCanvas.zoomScale - value.translation.height / 1000
                     nodeCanvas.zoomScale = max(targetZoomScale, NodeCanvas.minZoomScale)
                     nodeCanvas.dragChange += 1
+                    nodeCanvas.throttledSaveCanvas()
                 })
             .gesture(DragGesture()
                 .onChanged {
@@ -143,6 +147,9 @@ struct NodeCanvasView: View {
                             Image(systemName: LayoutAlgorithm.recurseOnFeedback.image)
                         }.tag(LayoutAlgorithm.recurseOnFeedback)
                     }
+                    .onChange(of: nodeCanvas.layoutAlgorithm, perform: { newLayout in
+                        nodeCanvas.updateLayout(newLayout: newLayout)
+                    })
                     
                 }
                 HStack {
@@ -154,12 +161,15 @@ struct NodeCanvasView: View {
                         Image(systemName: PipeType.curved.sysImage).tag(PipeType.curved)
                     }
                     .pickerStyle(.segmented)
+                    .onChange(of: nodeCanvas.connectionStyle, perform: { newValue in
+                        nodeCanvas.updateConnectionStyle(newStyle: newValue)
+                    })
                     Spacer()
                 }
 
                 HStack {
                     Divider()
-                    Text("Hidden Modules:")
+                    Text("Show/Hide:")
                     ForEach(HidableModules.allCases) {
                         module in
                         Toggle(isOn: Binding(get: { return nodeCanvas.hiddenModules.contains(module) }, set: {
@@ -172,6 +182,7 @@ struct NodeCanvasView: View {
                             nodeCanvas.updateFilteredNodes()
                         }), label: {
                             Label(module.description, systemImage: module.image)
+                                .foregroundColor(nodeCanvas.hiddenModules.contains(module) ? AppColors.ioActivated : AppColors.ioNormal)
                         })
                         .help(module.description)
                     }
@@ -218,6 +229,8 @@ struct NodeCanvasView: View {
             nodeCanvas.portalPosition = CGPoint(x: nodeCanvas.portalPosition.x + value.translation.width,
                                                 y: nodeCanvas.portalPosition.y + value.translation.height)
             nodeCanvas.dragOffset = .zero
+            
+            nodeCanvas.throttledSaveCanvas()
         }
     }
 }

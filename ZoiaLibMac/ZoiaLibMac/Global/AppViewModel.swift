@@ -400,7 +400,8 @@ class AppViewModel: ObservableObject {
                     if let wrappedPatch = self.sortedWrappedPatchList.first(where: { $0.patch.id == detailPatch.id } ) {
                         wrappedPatch.patchDetail = detailPatch
                         
-                        if detailPatch.fileName?.lowercased().suffix(4) != ".bin" {
+                        let isValid = detailPatch.fileName?.lowercased().suffix(4) == ".bin" || detailPatch.fileName?.lowercased().suffix(4) == ".zip"
+                        if !isValid {
                             wrappedPatch.patchDownloader.state = .invalidFile
                         }
                     }
@@ -553,6 +554,27 @@ class AppViewModel: ObservableObject {
     // + a .bin file which eaither follows the zioa naming convention or will be renamed to the zoia naming convention
     // of XXX_zoia_patch_name.binå
     
+    func openPatchInEditor(patchId: String ) {
+        if let comboPatch = libraryPatchList.first(where: { $0.patchJson.id.description == patchId }) {
+            NSWorkspace.shared.open(comboPatch.folderPath)
+        }
+    }
+    
+    func openPatchFolder(patchId: String) {
+        if let comboPatch = libraryPatchList.first(where: { $0.patchJson.id.description == patchId }) {
+            //NSWorkspace.shared.open(comboPatch.folderPath)
+            do {
+                let contents = try FileManager.default.contentsOfDirectory(at: comboPatch.folderPath, includingPropertiesForKeys: nil)
+                
+                if let firstFile = contents.first {
+                    NSWorkspace.shared.activateFileViewerSelecting([NSURL].init(arrayLiteral: NSURL.init(fileURLWithPath: firstFile.path)) as [URL])
+                }
+            } catch {
+                
+            }
+            
+        }
+    }
     
     // this call always returns on background thread
     func deletePatch(patch: LocalPatchCombo?, completion: ((Bool)->Void)? = nil) {

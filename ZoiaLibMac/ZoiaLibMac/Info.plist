@@ -27,10 +27,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>CFBundleURLName</key>
-			<string>zlib</string>
+			<string>zoialibmac</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>zlib</string>
+				<string>zoialibmac</string>
 			</array>
 		</dict>
 		<dict>
@@ -40,7 +40,7 @@
 			<string>com.polymorphicranch.zoia-lib-mac</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>zoialib</string>
+				<string>zoialibmac</string>
 			</array>
 		</dict>
 	</array>

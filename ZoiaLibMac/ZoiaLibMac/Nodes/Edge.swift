@@ -26,6 +26,8 @@ class Edge: ObservableObject, Identifiable {
     var dstConnection: NodeConnection
     var strength: Double = 100
     
+    @Published var isAudio: Bool
+    
     @Published var startPoint: CGPoint = .zero
     @Published var endPoint: CGPoint = .zero
     
@@ -33,6 +35,7 @@ class Edge: ObservableObject, Identifiable {
         self.srcConnection = src
         self.dstConnection = dst
         self.strength = strength
+        self.isAudio = false
         calculatePos()
     }
     
@@ -47,6 +50,9 @@ class Edge: ObservableObject, Identifiable {
         
         startPoint = CGPoint(x: sx, y: sy)
         endPoint = CGPoint(x: dx, y: dy)
+        
+        isAudio = srcConnection.port.name.contains("audio") || dstConnection.port.name.contains("audio") || srcConnection.port.name == "output_L" || srcConnection.port.name == "output_R" || dstConnection.port.name == "input_L" || dstConnection.port.name == "input_R"
+
     }
 }
 

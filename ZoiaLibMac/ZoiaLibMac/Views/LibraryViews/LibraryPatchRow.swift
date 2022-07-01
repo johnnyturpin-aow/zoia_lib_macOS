@@ -34,6 +34,7 @@ struct LibraryPatchRow: View {
                     .onDrag {
                         return NSItemProvider(item: patch.folderPath as NSURL, typeIdentifier: "public.file-url")
                     }
+
                 VStack(alignment: .leading, spacing: 0) {
                     Text(patch.patchJson.title ?? "")
                         .font(.system(size: 16, weight: .bold))
@@ -61,12 +62,18 @@ struct LibraryPatchRow: View {
                     
                 PatchCategoryView(patch: patch.patchJson, width: 80, isListStyle: true)
                 .padding(20)
-                
+
                 WrappingRoundedRectTagView(patch: patch.patchJson, uppercased: false, isListStyle: true, onTapped: { tag in
                     model.addTagFilter(tag: tag)
                 })
                 .padding(.leading, 5)
                 .frame(minWidth: 75, maxWidth: CloudPatchRow.tagsWidth)
+
+                PatchDownloadButton(patchDownloader: PatchDownloader(patchId: patch.patchJson.id.description, modifiedDate: patch.patchJson.updated_at ?? Date(), state: patch.patchJson.is_zip_archive == true ? .bundleIsZipFile : .bundleIsPatchFile),
+                                    subText: patch.patchJson.updated_at?.simpleDateString() ?? "",
+                                    subText2: nil,
+                                    width: 100,
+                                    hoverColor: Color("Color-8"), color: .primary, downloadingColor: Color("Color-9"))
                 Spacer()
             }
         }

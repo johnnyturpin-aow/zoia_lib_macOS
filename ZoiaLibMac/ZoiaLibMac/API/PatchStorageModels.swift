@@ -135,6 +135,9 @@ extension PatchStorage {
         let license: GenericObject?
         let customer_license_text: String?
         
+        // custom property to identify downloaded patches that are .zip archives
+        var is_zip_archive: Bool?
+        
         enum CodingKeys: String, CodingKey {
             case id
             case selfUrl = "self"
@@ -160,6 +163,7 @@ extension PatchStorage {
             case revision
             case license
             case customer_license_text
+            case is_zip_archive
         }
     }
 }

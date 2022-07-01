@@ -7,6 +7,8 @@
 import Foundation
 import SwiftUI
 import Combine
+import ZIPFoundation
+
 
 class PatchWrapper: ObservableObject, Identifiable, Equatable, Hashable, Comparable {
     
@@ -43,6 +45,9 @@ enum DownloadingState: String, Equatable {
     case downloadingPatchJson
     case downloadingBinary
     case completed
+    case bundleIsPatchFile
+    case bundleIsZipFile
+    case openBundleInNodeEditor
     case error
 }
 
@@ -85,15 +90,8 @@ class LocalPatchCombo: Identifiable, Equatable, Hashable, Comparable, Observable
 
 class PatchDownloader: Identifiable, ObservableObject {
     
-    @Published var state: DownloadingState = .noLocalCopy {
-        didSet {
-            print("state set to: \(self.state.rawValue)")
-            if self.state == .error {
-                print("check here")
-            }
-        }
-    }
-    private var patchId: String
+    @Published var state: DownloadingState = .noLocalCopy
+    var patchId: String
     private var modifiedDate: Date
     
     var id: String {
@@ -103,6 +101,12 @@ class PatchDownloader: Identifiable, ObservableObject {
     init(patchId: String, modifiedDate: Date) {
         self.patchId = patchId
         self.modifiedDate = modifiedDate
+    }
+    
+    init(patchId: String, modifiedDate: Date, state: DownloadingState) {
+        self.patchId = patchId
+        self.modifiedDate = modifiedDate
+        self.state = state
     }
     
     private var cancellable: Cancellable?
@@ -155,11 +159,11 @@ class PatchDownloader: Identifiable, ObservableObject {
                     self.state = .error
                 }
             }, receiveValue: {
-                [weak self] patch in
+                [weak self] patchJson in
                 
 
                 // TODO: Handle .zip files
-                guard let binaryFile = patch.files?.first(where: { $0.filename?.suffix(4).lowercased() == ".bin" }) else { self?.state = .error; completion?(.error); return }
+                guard let binaryFile = patchJson.files?.first(where: { $0.filename?.suffix(4).lowercased() == ".bin" || $0.filename?.suffix(4).lowercased() == ".zip" }) else { self?.state = .error; completion?(.error); return }
                 guard let binaryUrlStr = binaryFile.url else {  self?.state = .error; completion?(.error); return }
                 guard let request = self?.prepareDownloadRequest(urlStr: binaryUrlStr) else {  self?.state = .error; completion?(.error); return }
                 
@@ -195,7 +199,8 @@ class PatchDownloader: Identifiable, ObservableObject {
                     
                     DispatchQueue.global(qos: .background).async {
                         do {
-                            fileDirectory = try AppFileManager.patchLibraryUrl().appendingPathComponent(patch.id.description + AppFileManager.bundleExtension, isDirectory: true)
+
+                            fileDirectory = try AppFileManager.patchLibraryUrl().appendingPathComponent(patchJson.id.description + AppFileManager.bundleExtension, isDirectory: true)
                             guard let fileDirectory = fileDirectory else {
                                 DispatchQueue.main.async {
                                     self?.state = .error
@@ -204,7 +209,7 @@ class PatchDownloader: Identifiable, ObservableObject {
                                 return
                             }
                             // TODO: Handle .zip files
-                            guard patch.fileName?.suffix(4) == ".bin" else {
+                            guard patchJson.fileName?.suffix(4).lowercased() == ".bin"  || patchJson.fileName?.suffix(4).lowercased() == ".zip" else {
                                 DispatchQueue.main.async {
                                     self?.state = .error
                                     completion?(.error)
@@ -213,16 +218,69 @@ class PatchDownloader: Identifiable, ObservableObject {
                             }
 
                             try FileManager.default.createDirectory(at: fileDirectory, withIntermediateDirectories: true, attributes: nil)
-                            
-                            // let's make all binary patches use the format XXX_zoia_name.bin
-                            // use slot 000 but maintain other parts of name
-                            // this is because sometimes when authors update patches they change slot numbers of the patch
-                            var updatedPatchName: String?
-                            
-                            if patch.fileName?.first?.isNumber == true {
-                                if let patchFileName = patch.fileName {
-                                    let (isZoiaFile, _, patchName) = BankManager.parseZoiaFileName(filename: patchFileName)
-                                    guard isZoiaFile else {
+                            if patchJson.fileName?.suffix(4).lowercased() == ".zip" {
+                                
+                                if FileManager.default.fileExists(atPath: fileDirectory.path) {
+                                    try FileManager.default.removeItem(at: fileDirectory)
+                                }
+                                let tempDirecory = try AppFileManager.zipExtractionUrl()
+                                let archiveUrl = tempDirecory.appendingPathComponent(patchJson.id.description + ".zip")
+                                try FileManager.default.createDirectory(at: tempDirecory, withIntermediateDirectories: true, attributes: nil)
+                                try data.write(to: archiveUrl)
+                                try FileManager.default.unzipItem(at: archiveUrl, to: fileDirectory)
+                                try FileManager.default.removeItem(at: archiveUrl)
+                                
+                                let fileList = try FileManager.default.contentsOfDirectory(at: fileDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+                                for file in fileList {
+                                    let fileName = file.lastPathComponent
+                                    if fileName.suffix(4).lowercased() == ".bin" {
+                                        var updatedPatchName: String = "000_zoia_default.bin"
+                                        if fileName.first?.isNumber == true {
+                                            let (_, _, patchName) = BankManager.parseZoiaFileName(filename: fileName)
+                                            updatedPatchName = "000_zoia_" + String(patchName ?? "undefined")
+                                        } else {
+                                            updatedPatchName = "000_zoia_" + (patchJson.fileName ?? "patch" ) + ".bin"
+                                        }
+                                        let newFile = fileDirectory.appendingPathComponent(updatedPatchName, isDirectory: false)
+                                        try FileManager.default.moveItem(at: file, to: newFile)
+                                        let jsonFileName = fileDirectory.appendingPathComponent(patchJson.id.description + ".json")
+                                        if FileManager.default.fileExists(atPath: jsonFileName.path) {
+                                            try FileManager.default.removeItem(at: jsonFileName)
+                                        }
+                                        var updatedPatchJson: PatchStorage.Patch = patchJson
+                                        updatedPatchJson.is_zip_archive = true
+                                        let jsonData = try PatchStorageAPI.shared.jsonEncoder.encode(updatedPatchJson)
+                                        try jsonData.write(to: jsonFileName)
+                                        self?.setStateOnMain(newState: .completed)
+                                        completion?(.completed)
+                                        break
+                                    }
+                                }
+
+                            } else if patchJson.fileName?.suffix(4).lowercased() == ".bin" {
+                                // let's make all binary patches use the format XXX_zoia_name.bin
+                                // use slot 000 but maintain other parts of name
+                                // this is because sometimes when authors update patches they change slot numbers of the patch
+                                var updatedPatchName: String?
+                                
+                                if patchJson.fileName?.first?.isNumber == true {
+                                    if let patchFileName = patchJson.fileName {
+                                        let (isZoiaFile, _, patchName) = BankManager.parseZoiaFileName(filename: patchFileName)
+                                        guard isZoiaFile else {
+                                            try FileManager.default.removeItem(at: fileDirectory)
+                                            DispatchQueue.main.async {
+                                                self?.state = .error
+                                                completion?(.error)
+                                            }
+                                            return
+                                            
+                                        }
+                                        updatedPatchName = "000_zoia_" + String(patchName ?? "undefined")
+                                    } else {
+                                        updatedPatchName = "000_zoia_.bin"
+                                    }
+                                } else {
+                                    guard patchJson.fileName?.isEmpty == false else {
                                         try FileManager.default.removeItem(at: fileDirectory)
                                         DispatchQueue.main.async {
                                             self?.state = .error
@@ -231,40 +289,25 @@ class PatchDownloader: Identifiable, ObservableObject {
                                         return
                                         
                                     }
-                                    updatedPatchName = "000_zoia_" + String(patchName ?? "undefined")
-                                } else {
-                                    updatedPatchName = "000_zoia_.bin"
+                                    updatedPatchName = "000_zoia_" + (patchJson.fileName ?? "patch" ) + ".bin"
                                 }
-                            } else {
-                                guard patch.fileName?.isEmpty == false else {
-                                    try FileManager.default.removeItem(at: fileDirectory)
-                                    DispatchQueue.main.async {
-                                        self?.state = .error
-                                        completion?(.error)
-                                    }
-                                    return
-                                    
+                                let binaryFileName = fileDirectory.appendingPathComponent(updatedPatchName!)
+                                let jsonFileName = fileDirectory.appendingPathComponent(patchJson.id.description + ".json")
+                                
+                                if FileManager.default.fileExists(atPath: binaryFileName.path) {
+                                    try FileManager.default.removeItem(at: binaryFileName)
                                 }
-                                updatedPatchName = "000_zoia_" + (patch.fileName ?? "patch" ) + ".bin"
+                                if FileManager.default.fileExists(atPath: jsonFileName.path) {
+                                    try FileManager.default.removeItem(at: jsonFileName)
+                                }
+                                let jsonData = try PatchStorageAPI.shared.jsonEncoder.encode(patchJson)
+                                try jsonData.write(to: jsonFileName)
+                                try data.write(to: binaryFileName)
+                                
+                                self?.setStateOnMain(newState: .completed)
+                                completion?(.completed)
                             }
-                            
 
-                            let binaryFileName = fileDirectory.appendingPathComponent(updatedPatchName!)
-                            let jsonFileName = fileDirectory.appendingPathComponent(patch.id.description + ".json")
-                            
-                            if FileManager.default.fileExists(atPath: binaryFileName.path) {
-                                try FileManager.default.removeItem(at: binaryFileName)
-                            }
-                            if FileManager.default.fileExists(atPath: jsonFileName.path) {
-                                try FileManager.default.removeItem(at: jsonFileName)
-                            }
-                            let jsonData = try PatchStorageAPI.shared.jsonEncoder.encode(patch)
-                            try jsonData.write(to: jsonFileName)
-                            try data.write(to: binaryFileName)
-                            
-                            self?.setStateOnMain(newState: .completed)
-                            completion?(.completed)
-                            
                         } catch {
                             self?.setStateOnMain(newState: .error)
                             completion?(.error)

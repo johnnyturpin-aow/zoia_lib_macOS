@@ -67,6 +67,7 @@ struct CloudPatchRow: View {
                                 hoverColor: Color("Color-8"), color: .primary, downloadingColor: Color("Color-9"))
             .padding([.top, .bottom], 3)
 
+
             Spacer()
         }
         

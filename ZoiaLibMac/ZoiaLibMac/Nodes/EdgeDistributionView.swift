@@ -15,7 +15,7 @@ struct EdgeDistributionView: View {
             ForEach(nodeCanvas.edges) {
                 edge in
                 EdgeView(edge: edge, nodeCanvas: nodeCanvas)
-                    .stroke(Color("edgeStrokeColor"), lineWidth: 2)
+                    .stroke(edge.isAudio ? Color("edgeStrokeColor") : Color("Color-15") , lineWidth: edge.isAudio ? 3 : 1)
                     .animation(.linear, value: nodeCanvas.nodeDragChange)
             }
         }

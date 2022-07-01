@@ -56,6 +56,7 @@
 		10BD3E8A2839992600BCECD3 /* AppButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BD3E892839992600BCECD3 /* AppButtons.swift */; };
 		10CA7D322839D12500460B85 /* _zoia_.bin in Resources */ = {isa = PBXBuildFile; fileRef = 10CA7D312839D12500460B85 /* _zoia_.bin */; };
 		10CA7D342839D13900460B85 /* Factory in Resources */ = {isa = PBXBuildFile; fileRef = 10CA7D332839D13900460B85 /* Factory */; };
+		10D53E22286E11B000DD0E24 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 10D53E21286E11B000DD0E24 /* ZIPFoundation */; };
 		10D900CA2804A3BA0070B116 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 10D900C92804A3B90070B116 /* WrappingHStack */; };
 		10D900CE2804FC700070B116 /* CloudPatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D900CD2804FC700070B116 /* CloudPatchListView.swift */; };
 		10E5E4D2285D942B007EF96B /* DraggableModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E5E4D1285D942B007EF96B /* DraggableModifiers.swift */; };
@@ -92,7 +93,7 @@
 		1065A775282C77DB00B47479 /* BanksListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BanksListView.swift; sourceTree = "<group>"; };
 		1065A777282C7A1800B47479 /* BanksManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BanksManager.swift; sourceTree = "<group>"; };
 		1065A779282C92EC00B47479 /* BankRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankRowView.swift; sourceTree = "<group>"; };
-		106753C127E7C42F00476AC3 /* ZLIB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZLIB.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		106753C127E7C42F00476AC3 /* ZoiaLibMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZoiaLibMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		106753C427E7C42F00476AC3 /* ZoiaLibMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoiaLibMacApp.swift; sourceTree = "<group>"; };
 		106753C627E7C42F00476AC3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		106753C827E7C43000476AC3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -128,6 +129,7 @@
 				10B5BA7128077C37001B4203 /* CachedAsyncImage in Frameworks */,
 				10D900CA2804A3BA0070B116 /* WrappingHStack in Frameworks */,
 				100AEFC3281E1C3A007FDAED /* YouTubePlayerKit in Frameworks */,
+				10D53E22286E11B000DD0E24 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,7 +231,7 @@
 		106753C227E7C42F00476AC3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				106753C127E7C42F00476AC3 /* ZLIB.app */,
+				106753C127E7C42F00476AC3 /* ZoiaLibMac.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -277,9 +279,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		106753C027E7C42F00476AC3 /* ZLIB */ = {
+		106753C027E7C42F00476AC3 /* ZoiaLibMac */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 106753D027E7C43000476AC3 /* Build configuration list for PBXNativeTarget "ZLIB" */;
+			buildConfigurationList = 106753D027E7C43000476AC3 /* Build configuration list for PBXNativeTarget "ZoiaLibMac" */;
 			buildPhases = (
 				106753BD27E7C42F00476AC3 /* Sources */,
 				106753BE27E7C42F00476AC3 /* Frameworks */,
@@ -289,14 +291,15 @@
 			);
 			dependencies = (
 			);
-			name = ZLIB;
+			name = ZoiaLibMac;
 			packageProductDependencies = (
 				10D900C92804A3B90070B116 /* WrappingHStack */,
 				10B5BA7028077C37001B4203 /* CachedAsyncImage */,
 				100AEFC2281E1C3A007FDAED /* YouTubePlayerKit */,
+				10D53E21286E11B000DD0E24 /* ZIPFoundation */,
 			);
 			productName = ZoiaLibMac;
-			productReference = 106753C127E7C42F00476AC3 /* ZLIB.app */;
+			productReference = 106753C127E7C42F00476AC3 /* ZoiaLibMac.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -327,12 +330,13 @@
 				10D900C82804A3B90070B116 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 				10B5BA6F28077C37001B4203 /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
 				100AEFC1281E1C3A007FDAED /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */,
+				10D53E20286E11B000DD0E24 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = 106753C227E7C42F00476AC3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				106753C027E7C42F00476AC3 /* ZLIB */,
+				106753C027E7C42F00476AC3 /* ZoiaLibMac */,
 			);
 		};
 /* End PBXProject section */
@@ -592,7 +596,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		106753D027E7C43000476AC3 /* Build configuration list for PBXNativeTarget "ZLIB" */ = {
+		106753D027E7C43000476AC3 /* Build configuration list for PBXNativeTarget "ZoiaLibMac" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				106753D127E7C43000476AC3 /* Debug */,
@@ -620,6 +624,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		10D53E20286E11B000DD0E24 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.9;
+			};
+		};
 		10D900C82804A3B90070B116 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/dkk/WrappingHStack";
@@ -640,6 +652,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 10B5BA6F28077C37001B4203 /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */;
 			productName = CachedAsyncImage;
+		};
+		10D53E21286E11B000DD0E24 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 10D53E20286E11B000DD0E24 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
 		};
 		10D900C92804A3B90070B116 /* WrappingHStack */ = {
 			isa = XCSwiftPackageProductDependency;

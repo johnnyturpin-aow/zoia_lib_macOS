@@ -40,12 +40,11 @@ struct LibraryPatchDetailView: View {
                 }
 
                 Spacer()
-                HStack {
-                    Spacer()
-                    Text("Version: " + (patch.patchJson.revision ?? ""))
-                        .font(.system(size: 12, weight: .light))
-                        .foregroundStyle(.secondary)
-                }
+                PatchDownloadButton(patchDownloader: PatchDownloader(patchId: patch.patchJson.id.description, modifiedDate: patch.patchJson.updated_at ?? Date(), state: .openBundleInNodeEditor),
+                                    subText: patch.patchJson.updated_at?.simpleDateString() ?? "",
+                                    subText2: patch.patchJson.revision,
+                                    width: 100,
+                                    hoverColor: Color("Color-8"), color: .primary, downloadingColor: Color("Color-9"))
             }
             .padding([.leading, .trailing], Layout.detailViewSideMargin)
             
@@ -136,3 +135,13 @@ struct LibraryPatchDetailView: View {
     }
 }
 
+/*
+ .contextMenu {
+     Button {
+         // openDirectory
+         model.openPatchFolder(comboPatch: patch)
+     } label: {
+         Text("Open Patch Bundle")
+     }
+ }
+ */

@@ -23,12 +23,35 @@ enum PipeType: String, Identifiable, Codable {
 }
 
 struct NodeCanvasCodable: Codable {
+    
     let nodeList: [NodeCodable]
     let connectionStyle: PipeType?
+    let hiddenModules: [HidableModules]?
+    let algorithm: LayoutAlgorithm?
+    let zoomScale: Double?
+    let portalPosition: CanvasPosition?
+    
+    init(nodeCanvas: NodeCanvas) {
+        
+        let listOfNodes: [NodeCodable] = nodeCanvas.nodes.map {
+            node in
+            let canvasPos = CanvasPosition(x: node.position.x, y: node.position.y)
+            let nodeColor = CodableColor(color: node.color)
+            let codableNode = NodeCodable(mod_idx: node.mod_idx, position: canvasPos, color: nodeColor)
+            return codableNode
+        }
+        
+        self.nodeList = listOfNodes
+        self.connectionStyle = nodeCanvas.connectionStyle
+        self.hiddenModules = Array(nodeCanvas.hiddenModules)
+        self.algorithm = nodeCanvas.layoutAlgorithm
+        self.zoomScale = nodeCanvas.zoomScale
+        self.portalPosition = CanvasPosition(x: nodeCanvas.portalPosition.x, y: nodeCanvas.portalPosition.y)
+    }
 }
 
 
-enum LayoutAlgorithm: String, Identifiable {
+enum LayoutAlgorithm: String, Codable, Identifiable {
     
     case singleRow = "Single Row"
     case simple = "Compact"
@@ -61,12 +84,13 @@ enum LayoutAlgorithm: String, Identifiable {
 // 45 = Value
 // 56 = UI Button
 // 81 = Pixel
-enum HidableModules: Int, Identifiable, CaseIterable {
+enum HidableModules: Int, Codable, Identifiable, CaseIterable {
     case pushButton = 15
     case keyboard = 16
     case valueInput = 45
     case uiButton = 56
     case pixel = 81
+    case connections = 9999
     
     var id: Int { rawValue }
     
@@ -77,6 +101,7 @@ enum HidableModules: Int, Identifiable, CaseIterable {
         case .pushButton: return "Push Button"
         case .uiButton: return "UI Button"
         case .valueInput: return "Value"
+        case .connections: return "Connections"
         }
     }
     
@@ -92,6 +117,8 @@ enum HidableModules: Int, Identifiable, CaseIterable {
             return "square.grid.3x3.topleft.filled"
         case .pixel:
             return "squareshape.dashed.squareshape"
+        case .connections:
+            return "point.topleft.down.curvedto.point.bottomright.up.fill"
         }
     }
 }
@@ -111,7 +138,6 @@ class NodeCanvas: ObservableObject {
         selection = SelectionHandler()
     }
 
-    
     static let row0_y: CGFloat = 0
     static let col0_x: CGFloat = 0
     static let col5_x: CGFloat = (300 + 30) * 6
@@ -130,6 +156,7 @@ class NodeCanvas: ObservableObject {
     @Published var isDraggingCanvas: Bool = false
     
     @Published var isDraggingSelectionRect: Bool = false
+    
     @Published var selectionRect: CGRect = .zero {
         didSet {
             if isDraggingSelectionRect {
@@ -137,7 +164,7 @@ class NodeCanvas: ObservableObject {
             }
         }
     }
-    
+
     func selectAllNodesInSelectionRect() {
         
         for node in nodes {
@@ -155,18 +182,23 @@ class NodeCanvas: ObservableObject {
     
     @Published var dragChange: Int = 0
     @Published var nodeDragChange: Int = 0
-    @Published var connectionStyle: PipeType = .curved {
-        didSet {
-            self.edges = []
+    @Published var connectionStyle: PipeType = .curved
+    
+    func updateConnectionStyle(newStyle: PipeType) {
+        self.connectionStyle = newStyle
+        self.edges = []
+        if !self.hiddenModules.contains(.connections) {
             self.placeConnections()
+            self.throttledSaveCanvas()
         }
     }
     
-    @Published var layoutAlgorithm: LayoutAlgorithm = .moveChildNodes {
-        didSet {
-            if self.patch != nil {
-                self.placeNodes(useSavedNodes: false)
-            }
+    @Published var layoutAlgorithm: LayoutAlgorithm = .moveChildNodes
+    func updateLayout(newLayout: LayoutAlgorithm) {
+        self.layoutAlgorithm = newLayout
+        if self.patch != nil {
+            self.placeNodes(useSavedNodes: false)
+            self.throttledSaveCanvas()
         }
     }
 
@@ -174,11 +206,6 @@ class NodeCanvas: ObservableObject {
     var modulesToPlace: [ParsedBinaryPatch.Module] = []
     var nodeTable: [Int:[Node]] = [:]
     var moduleTable: [Int: [ParsedBinaryPatch.Module]] = [:]
-    
-    //var modulesInCurrentPass: [ParsedBinaryPatch.Module] = []
-    
-    
-    
     var hiddenModules: Set<HidableModules> = []
 
     
@@ -187,13 +214,13 @@ class NodeCanvas: ObservableObject {
     var maxNumRows: Int = 0
     var ohShit: Int = 0
     
-    let dontSave = true
+    let dontSave = false
     
     var nodeListSaveTimer: Timer?
 
-    // our list of saved node positions
-    var savedNodes: NodeCanvasCodable?
+    //var lastSavedNodeCanvas: NodeCanvasCodable?
     
+    var loadedNodeCodableList: [NodeCodable] = []
     var adjustmentRoot: Node?
     var feedbackList: Set<Node> = []
     
@@ -201,6 +228,19 @@ class NodeCanvas: ObservableObject {
         case initialColumn(nextYOffset: CGFloat)
         case arbitraryColumn(column: Int, nextYOffset: CGFloat)
     }
+    
+    
+    func throttledSaveCanvas() {
+        nodeListSaveTimer?.invalidate()
+        nodeListSaveTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) {
+            [weak self] timer in
+            if self?.dontSave == false  {
+                self?.saveCanvas()
+            }
+            self?.nodeListSaveTimer = nil
+        }
+    }
+    
     
     
     func open(url: URL, appModel: AppViewModel) {
@@ -213,6 +253,7 @@ class NodeCanvas: ObservableObject {
             self.patch = observablePatch
             
             if let patchName = self.patch?.parsedPatchFile?.name {
+                // this is used by the global menu items... might remove
                 self.appModel?.addLayoutChangeListener(nodeCanvasId: patchName, handler: {
                     algorithm in
                     
@@ -223,9 +264,11 @@ class NodeCanvas: ObservableObject {
                 })
             }
             
-            self.loadNodes {
+            print("loading saved canvas...")
+            self.loadCanvas {
                 _ in
                 self.placeNodes(useSavedNodes: true)
+                self.saveCanvas()
             }
         }
     }
@@ -252,47 +295,40 @@ class NodeCanvas: ObservableObject {
                 self.positionNode(node, position: nextPosition)
             }
         }
-        
-        nodeListSaveTimer?.invalidate()
-        nodeListSaveTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) {
-            [weak self] timer in
-            
-            if self?.dontSave == false  { self?.saveNodes() }
-            
-            self?.nodeListSaveTimer = nil
-        }
     }
     
     func nodeWithID(_ id: NodeID) -> Node? {
         return nodes.first(where: { $0.id == id })
     }
     
-    
-    func saveNodes() {
+    private func saveCanvas(completion: (()->Void)? = nil) {
         guard let bundleUrl = self.bundlePath else { return }
-        let listOfNodes: [NodeCodable] = nodes.map {
-            node in
-            let canvasPos = CanvasPosition(x: node.position.x, y: node.position.y)
-            let nodeColor = CodableColor(color: node.color)
-            let codableNode = NodeCodable(mod_idx: node.mod_idx, position: canvasPos, color: nodeColor)
-            return codableNode
-        }
-        let nodeList = NodeCanvasCodable(nodeList: listOfNodes, connectionStyle: self.connectionStyle)
-        
-        ZoiaBundle.saveNodeList(bundleUrl: bundleUrl, nodeList: nodeList) {
-            //print("nodes saved")
+        let nodeCanvasCodable = NodeCanvasCodable(nodeCanvas: self)
+        self.loadedNodeCodableList = nodeCanvasCodable.nodeList
+        print("saving canvas")
+        ZoiaBundle.saveNodeCanvasCodable(bundleUrl: bundleUrl, nodeList: nodeCanvasCodable) {
+            DispatchQueue.main.async {
+                completion?()
+            }
         }
     }
     
-    func loadNodes(completion: @escaping (Bool)->Void) {
-        guard let bundleUrl = self.bundlePath else { return }
-        ZoiaBundle.loadNodeList(bundleUrl: bundleUrl) {
+    func loadCanvas(completion: @escaping (Bool)->Void) {
+        guard let bundleUrl = self.bundlePath else { completion(false); return }
+        ZoiaBundle.loadNodeCanvasCodable(bundleUrl: bundleUrl) {
             loadedNodeCanvas in
             
             DispatchQueue.main.async {
+                
+                if loadedNodeCanvas == nil { print("no saved canvas was found... we should be doing a full layout pass...") }
                 guard loadedNodeCanvas != nil else { completion(false); return }
-                self.savedNodes = loadedNodeCanvas
+                //self.lastSavedNodeCanvas = loadedNodeCanvas
+                self.loadedNodeCodableList = loadedNodeCanvas?.nodeList ?? []
+                self.hiddenModules = Set(loadedNodeCanvas?.hiddenModules ?? [])
                 self.connectionStyle = loadedNodeCanvas?.connectionStyle ?? .curved
+                self.layoutAlgorithm = loadedNodeCanvas?.algorithm ?? .moveChildNodes
+                self.portalPosition = CGPoint(x: loadedNodeCanvas?.portalPosition?.x ?? 0, y: loadedNodeCanvas?.portalPosition?.y ?? 0)
+                self.zoomScale = loadedNodeCanvas?.zoomScale ?? 0.99
                 completion(true)
             }
         }
@@ -307,28 +343,15 @@ class NodeCanvas: ObservableObject {
     }
 
     func updateFilteredNodes() {
-        placeNodes(useSavedNodes: true)
-    }
-    
-    
-    // some patches use multiple instances of output nodes - we will consolidate all instances into a single instance
-    // this should be called prior to any connections made as it currently doesn't reconnect ports / connections
-    // for now, the only global module instance we support is Audio Output
-    func consolidateGlobalNodes() {
-        let dividedNodes: [Bool:[Node]] = Dictionary.init(grouping: nodes, by: { $0.ref_mod_idx == 2 })
-        
-        let outputNodes: [Node] = dividedNodes[true] ?? []
-        
-        if outputNodes.count > 1 {
-            let firstOutputNode = outputNodes.first
-            //var remainingNodes = Array(outputNodes.dropFirst())
-            nodes = dividedNodes[false] ?? []
-            if let outputNode = firstOutputNode {
-                nodes.append(outputNode)
-            }
-
+        nodeListSaveTimer?.invalidate()
+        saveCanvas() {
+            [weak self] in
+            self?.placeNodes(useSavedNodes: true)
+            self?.saveCanvas()
         }
     }
+
+
     
     func fitNodesInView() {
         
@@ -373,41 +396,51 @@ class NodeCanvas: ObservableObject {
         nodes = []
         edges = []
         
-        print("placing nodes - hopefully we have a view size by now...")
+        print("placing nodes...")
         
-        if useSavedNodes && savedNodes != nil {
-            placeNodesFromSave()
+        if useSavedNodes && !loadedNodeCodableList.isEmpty {
+            print("we are placing nodes using saved positions...")
+            placeNodesUsingSavedPos()
+            // placing connections is always last
+            if !hiddenModules.contains(.connections) {
+                placeConnections()
+            }
         } else {
+            if useSavedNodes == false { print("not using saved nodes - using chosen layout algorithm") }
+            if useSavedNodes && loadedNodeCodableList.isEmpty {
+                print("loadedNodeCodableList is empty - this is our first layout pass...")
+            }
             switch layoutAlgorithm {
             case .simple:
-                placeNodesInputToOutput()
+                layoutNodesInputToOutput()
             case .simpleRecursive:
-                placeNodesRecursive()
+                layoutNodesRecursive()
             case .moveChildNodes:
-                placeNodesRecursive()
+                layoutNodesRecursive()
             case .recurseOnFeedback:
-                placeNodesRecursive()
+                layoutNodesRecursive()
             case .singleRow:
-                placeNodesSingleRow()
+                layoutNodesInSingleRow()
             }
+            // placing connections is always last
+            if !hiddenModules.contains(.connections) {
+                placeConnections()
+            }
+            
+            fitNodesInView()
         }
-        
-        // placing connections is always last
-        placeConnections()
-        
-        fitNodesInView()
     }
     
     
     // if no save, will simply place nodes in a single row
-    func placeNodesFromSave() {
+    func placeNodesUsingSavedPos() {
         
         var placedNodes: [Node] = []
         var curX: CGFloat = 0
         modulesToPlace = patch?.parsedPatchFile?.modules ?? []
         for module in modulesToPlace {
             if isModuleVisible(module: module) {
-                let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
+                let savedNode = loadedNodeCodableList.first(where: { $0.mod_idx == module.number })
                 let nodePos = CGPoint(x: savedNode?.position.x ?? curX, y: savedNode?.position.y ?? 0)
                 let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
                 node.colorId = module.color
@@ -425,7 +458,7 @@ class NodeCanvas: ObservableObject {
     }
     
 
-    func placeNodesSingleRow() {
+    func layoutNodesInSingleRow() {
         var placedNodes: [Node] = []
         var curX: CGFloat = 0
         modulesToPlace = patch?.parsedPatchFile?.modules ?? []
@@ -448,10 +481,10 @@ class NodeCanvas: ObservableObject {
     }
 
 
-    func placeNodesRecursive() {
+    func layoutNodesRecursive() {
         
-        // we start off by placing nodes in single row
-        placeNodesSingleRow()
+        // we start off by placing nodes in single row (this filters out the non visible nodes)
+        layoutNodesInSingleRow()
         placeConnections()
         
         nodeTable = [:]
@@ -545,6 +578,9 @@ class NodeCanvas: ObservableObject {
         
         nodes = replaced_nodes
         
+        
+        // remove connections we used for positioning
+        edges = []
     }
     
     func scoreLeft(node: Node, depth: Int) -> Set<Node> {
@@ -623,7 +659,7 @@ class NodeCanvas: ObservableObject {
     // this method puts all nodes with no inputs in 1st column and completes layout following output->input
     // no recursion, no scoring of node placement, no detection of crossed edges
     // it's bad - but it is dirt simple and it works
-    func placeNodesInputToOutput() {
+    func layoutNodesInputToOutput() {
         
         nodeTable = [:]
         moduleTable = [:]
@@ -655,10 +691,7 @@ class NodeCanvas: ObservableObject {
                     
                     if isModuleVisible(module: module) {
                         moduleTable[0]?.append(module)
-                        
-                        let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
-                        let nodePos = CGPoint(x: savedNode?.position.x ?? NodeCanvas.col0_x, y: savedNode?.position.y ?? curY)
-                        //let node = Node(name: module.name ?? "", mod_idx: module.number, pos: CGPoint(x: NodeCanvas.col0_x, y: curY))
+                        let nodePos = CGPoint(x: NodeCanvas.col0_x, y: curY)
                         let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
                         node.colorId = module.color
                         for block in module.input_blocks {
@@ -690,8 +723,7 @@ class NodeCanvas: ObservableObject {
                     
                     if isModuleVisible(module: module) {
                         moduleTable[NodeCanvas.lastColIndex]?.append(module)
-                        let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == module.number })
-                        let nodePos = CGPoint(x: savedNode?.position.x ?? NodeCanvas.col5_x, y: savedNode?.position.y ?? curY)
+                        let nodePos = CGPoint(x: NodeCanvas.col5_x, y: curY)
                         let node = Node(name: module.name ?? "", mod_idx: module.number, ref_mod_idx: module.ref_mod_idx, pos: nodePos)
                         node.colorId = module.color
                         for block in module.input_blocks {
@@ -754,8 +786,7 @@ class NodeCanvas: ObservableObject {
         let lastCol = nodeTable.keys.count - 1
         
         for node in nodeTable[NodeCanvas.lastColIndex] ?? [] {
-            let savedNode = self.savedNodes?.nodeList.first(where: { $0.mod_idx == node.mod_idx })
-            node.position.x = savedNode?.position.x ?? (NodeCanvas.col0_x + (NodeView.nodeWidth + NodeCanvas.column_spacing) * CGFloat(lastCol))
+            node.position.x = (NodeCanvas.col0_x + (NodeView.nodeWidth + NodeCanvas.column_spacing) * CGFloat(lastCol))
         }
 
         for (_, values) in nodeTable {
@@ -774,21 +805,8 @@ class NodeCanvas: ObservableObject {
             guard let srcNode = self.nodes.first(where: { $0.mod_idx == blockConnection.source_module_idx }) else { continue }
             
             var dstNode: Node?
-            
             dstNode = self.nodes.first(where: { $0.mod_idx == blockConnection.dest_module_idx })
-            /*
-            // check for Audio Output
-            if let dstModIdx = blockConnection.dest_module_idx, let dstModule = patch?.parsedPatchFile?.modules[dstModIdx] {
-                if dstModule.ref_mod_idx == 2 {
-                    dstNode = nodes.first(where: { $0.ref_mod_idx == 2 })
-                } else {
-                    dstNode = self.nodes.first(where: { $0.mod_idx == blockConnection.dest_module_idx })
-                }
-            }
-            */
-            
             guard let dstNode = dstNode else { continue }
-
             guard let srcPortIndex = blockConnection.source_block_idx else { continue }
             guard let destPortIndex = blockConnection.dest_block_idx else { continue }
             guard let srcPort = srcNode.outputs.item(at: srcPortIndex) else  { continue }

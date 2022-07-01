@@ -58,6 +58,7 @@ final class AppFileManager {
     let fileManager = FileManager.default
     private static let appFolderName = "ZoiaLib"
     private static let patchFileFolderName = "Library"
+    private static let tempFileFolderName = "temp"
     private static let banksFolderName = "Banks"
     private static let factoryBankFolderName = "Factory"
     private static let editorFolderName = "Editor"
@@ -76,6 +77,12 @@ final class AppFileManager {
         try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent(AppFileManager.appFolderName)
             .appendingPathComponent(AppFileManager.patchFileFolderName)
+    }
+    
+    static func zipExtractionUrl() throws -> URL {
+        try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            .appendingPathComponent(AppFileManager.appFolderName)
+            .appendingPathComponent(AppFileManager.tempFileFolderName)
     }
     
     static func editorFolderUrl() throws -> URL {

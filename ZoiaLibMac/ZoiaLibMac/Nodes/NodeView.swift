@@ -110,6 +110,7 @@ struct NodeView: View {
                     let scaledTranslation = value.translation.unscaleBy(nodeCanvas.zoomScale)
                     nodeCanvas.processNodeTranslation(scaledTranslation, nodes: selection.draggingNodes)
                     selection.stopDragging(nodeCanvas)
+                    nodeCanvas.throttledSaveCanvas()
                 }
             })
     }

@@ -133,6 +133,7 @@ struct PatchDownloadButton: View {
     static let downloadIconSize: CGFloat = 36.0
     @State private var downloadButtonHover = false
     
+    @EnvironmentObject private var model: AppViewModel
     let subText: String
     let subText2: String?
     let width: CGFloat
@@ -202,6 +203,59 @@ struct PatchDownloadButton: View {
                         .font(.system(size: PatchDownloadButton.downloadIconSize))
                         .foregroundColor(.red)
                         .padding(0)
+                case .bundleIsPatchFile:
+                    Button {
+                        model.openPatchFolder(patchId: patchDownloader.patchId)
+                    } label: {
+                        Image("doc-waveform")
+                            .font(.system(size: PatchDownloadButton.downloadIconSize))
+                            .foregroundStyle(color)
+                            .padding(0)
+                    }
+                    
+                    .padding(0)
+                    .foregroundStyle(downloadButtonHover ? hoverColor : color)
+                    .buttonStyle(PlainButtonStyle())
+                    .onHover { over in
+                        downloadButtonHover = over
+                    }
+                case .bundleIsZipFile:
+                    Button {
+                        model.openPatchFolder(patchId: patchDownloader.patchId)
+                    } label: {
+                        Image(systemName: "doc.zipper")
+                            .font(.system(size: PatchDownloadButton.downloadIconSize))
+                            .foregroundStyle(color)
+                            .padding(0)
+                    }
+                    .padding(0)
+                    .foregroundStyle(downloadButtonHover ? hoverColor : color)
+                    .buttonStyle(PlainButtonStyle())
+                    .onHover { over in
+                        downloadButtonHover = over
+                    }
+                case .openBundleInNodeEditor:
+                    Button {
+                        model.openPatchInEditor(patchId: patchDownloader.patchId)
+                    } label: {
+                        Image("node-square")
+                            .font(.system(size: PatchDownloadButton.downloadIconSize))
+                            .foregroundStyle(color)
+                            .padding(0)
+                    }
+                    .contextMenu {
+                        Button {
+                            model.openPatchFolder(patchId: patchDownloader.patchId)
+                        } label: {
+                            Text("View in finder")
+                        }
+                    }
+                    .padding(0)
+                    .foregroundStyle(downloadButtonHover ? hoverColor : color)
+                    .buttonStyle(PlainButtonStyle())
+                    .onHover { over in
+                        downloadButtonHover = over
+                    }
                 }
             }
             .padding(.bottom, 1)

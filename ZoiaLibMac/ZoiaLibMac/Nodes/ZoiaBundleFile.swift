@@ -9,7 +9,7 @@ import Foundation
 final class ZoiaBundle {
     
     
-    static func saveNodeList(bundleUrl: URL, nodeList: NodeCanvasCodable, completion: (()->Void)? = nil) {
+    static func saveNodeCanvasCodable(bundleUrl: URL, nodeList: NodeCanvasCodable, completion: (()->Void)? = nil) {
         DispatchQueue.global(qos: .background).async {
             do {
                 let nodeFile = bundleUrl.appendingPathComponent("nodes.json")
@@ -27,7 +27,7 @@ final class ZoiaBundle {
         }
     }
     
-    static func loadNodeList(bundleUrl: URL, completion: @escaping ((NodeCanvasCodable?)->Void)) {
+    static func loadNodeCanvasCodable(bundleUrl: URL, completion: @escaping ((NodeCanvasCodable?)->Void)) {
         DispatchQueue.global(qos: .background).async {
             do {
                 let nodeFile = bundleUrl.appendingPathComponent("nodes.json")
