@@ -5,6 +5,8 @@
 
 ## Overview
 
+![app screenshot](app-screenshot-v1.0.png?raw=true)
+
 The main layout is based on a macOs Sidebar Navigation App - which contains 3 panels and should be familiar to all macOS users.
 
 ### App Modes / Navigation Tabs
@@ -31,6 +33,9 @@ Both ZOIA and Euroburo Factory Banks are included with the installation of the A
 - Patches in your Library can be deleted using the "swipe to delete" gesture common on macOS / iOS or also by simply selecting a patch and hitting the delete key.
 
 ## Patch Detail View
+
+![ioView](ioview-with-midi-nodeview-button.png?raw=true)
+
 - There is a Patch Utilization panel in the detail view which should give a quick reference to the I/O supported by the patch as well as the estimated CPU utilization and number of pages.
 - The I/O field labels use a Moog label style - outline is an input - filled is an output. Grey is not used. Blue is used.
 - The last column is for MIDI I/O. MIDI data that is supported uses the following shorthand:
@@ -58,6 +63,10 @@ Both ZOIA and Euroburo Factory Banks are included with the installation of the A
 
 
 ## Node View
+
+
+![Node View](shim-shimeree-nodeview.png.png?raw=true)
+
 - You can view the modules of a patch in Node View mode by clicking on the "Node View" button in the Library detail view (to the right of the Patch Name) or by double-clicking on the Patch Utilization overview panel
 - There are 4 differen layout algorithms to initialize the module positions:
 	- Single Row: All modules are positioned in a single row
