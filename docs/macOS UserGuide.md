@@ -65,7 +65,7 @@ Both ZOIA and Euroburo Factory Banks are included with the installation of the A
 ## Node View
 
 
-![Node View](shim-shimeree-nodeview.png.png?raw=true)
+![NodeView](shim-shimeree-nodeview.png?raw=true)
 
 - You can view the modules of a patch in Node View mode by clicking on the "Node View" button in the Library detail view (to the right of the Patch Name) or by double-clicking on the Patch Utilization overview panel
 - There are 4 differen layout algorithms to initialize the module positions:
