@@ -4,7 +4,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
-![app screenshot](/docs/app-screenshot.png?raw=true)
+![app screenshot](/docs/app-screenshot-v1.0.png?raw=true)
 
 This is a native macOS Patch Manager / Librarian for the Empress Effects ZOIA / Euroburo modular effects unit. It is written in Swift/SwiftUI which is currently (and unfortunately) not cross-platform. It is a "spiritual" fork / companion to the cross-platform (python/qt) ZOIA Librarian which can be found here: [https://github.com/meanmedianmoge/zoia_lib](https://github.com/meanmedianmoge/zoia_lib)
 
@@ -36,7 +36,7 @@ The latest release .dmg installer can be found here:
 
 This is a modern SwiftUI macOS native application. As such, it has some unfortunately hefty requirements (imposed by Apple not by the developers).
 
-**This application requires Xcode >= 13.3 and macOS Monterey**
+**This application requires Xcode >= 13.3 to build and macOS Monterey to run**
 
 
 ---------
