@@ -37,7 +37,7 @@ class AppViewModel: ObservableObject {
     
     // MARK: Selection State properties
     @Published var selectedBrowsePatch: PatchWrapper?
-    @Published var selectedFactoryPatchId: String? { didSet { onSelectedFactoryPatchDidChange() }}
+    @Published var selectedFactoryPatchId: String? // { didSet { onSelectedFactoryPatchDidChange() }}
     @Published var selectedBinaryPatchId: String? { didSet { onSelectedBankPatchChange() }}
     @Published var selectedBrowsePatchId: PatchStorage.Patch.ID? { didSet { onSelectedBrowsePatchChange(oldValue: oldValue) }}
     @Published var selectedLocalPatchId: PatchStorage.Patch.ID? { didSet { onSelectedLibraryPatchChange(oldValue: oldValue) }}
@@ -52,13 +52,15 @@ class AppViewModel: ObservableObject {
 
     var layoutChangeListeners: [String: (LayoutAlgorithm)->Void] = [:]
     
-    @Published var nodeViewLayoutAlgorithm: LayoutAlgorithm = .moveChildNodes {
+    @Published var nodeViewLayoutAlgorithm: LayoutAlgorithm = .simpleRecursive {
         didSet {
             for (_, value) in layoutChangeListeners {
                 value(nodeViewLayoutAlgorithm)
             }
         }
     }
+    
+    @Published var nodeViewWindowName: String?
     
     func addLayoutChangeListener(nodeCanvasId: String, handler: @escaping (LayoutAlgorithm)->Void) {
         layoutChangeListeners[nodeCanvasId] = handler
@@ -114,8 +116,8 @@ class AppViewModel: ObservableObject {
     
     @Published var sortedLocalPatchList: [LocalPatchCombo] = []
     @Published var banks: [Bank] = []
-    @Published var factoryBank: Bank?
-
+    //@Published var factoryBank: Bank?
+    @Published var factoryBank: [BankType:Bank] = [:]
     
     // MARK: - Combine management properties
     var startupCancellables = Set<AnyCancellable>()
@@ -200,9 +202,9 @@ class AppViewModel: ObservableObject {
         }
     }
     
-    func onSelectedFactoryPatchDidChange() {
+    func onSelectedFactoryPatchDidChange(bankType: BankType) {
         guard let patchIndex = Int(self.selectedFactoryPatchId ?? "") else { return }
-        guard let patchFile = self.factoryBank?.orderedPatches.item(at: patchIndex) else { return }
+        guard let patchFile = self.factoryBank[bankType]?.orderedPatches.item(at: patchIndex) else { return }
         self.selectedBinaryPatchFile = ObservableBinaryPatch(patchFile: patchFile, parsedPatchFile: patchFile.parsedPatch)
     }
     
@@ -271,11 +273,11 @@ class AppViewModel: ObservableObject {
                 
                 // TODO: this feels like a wonky way to handle the factory library - revisit
                 
-                var culled = bankList
-                if let factoryIndex = culled.firstIndex(where: { $0.isFactoryBank == true }) {
-                    self.factoryBank = culled.remove(at: factoryIndex)
-                }
-                self.banks = culled
+                let userBanks = bankList.filter({ $0.bankType == .user })
+                
+                self.factoryBank[.zoia] = bankList.filter({ $0.bankType == .zoia }).first
+                self.factoryBank[.euroburo] = bankList.filter({$0.bankType == .euroburo }).first
+                self.banks = userBanks
             }
         } ?? Progress()
     }
@@ -556,6 +558,7 @@ class AppViewModel: ObservableObject {
     
     func openPatchInEditor(patchId: String ) {
         if let comboPatch = libraryPatchList.first(where: { $0.patchJson.id.description == patchId }) {
+            nodeViewWindowName = comboPatch.parsedPatch?.name ?? "nodeView"
             NSWorkspace.shared.open(comboPatch.folderPath)
         }
     }

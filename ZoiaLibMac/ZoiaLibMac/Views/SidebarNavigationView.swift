@@ -47,8 +47,11 @@ struct SidebarNavigationView: View {
                             bank in
                             BankNavigationLink(bank: bank, showConfirmDelete: $showConfirmDelete)
                         }
-                        if let factoryBank = model.factoryBank {
-                            FactoryBankNavigationLink(bank: factoryBank, showConfirmDelete: $showConfirmDelete)
+                        if let zoiaBank = model.factoryBank[.zoia] {
+                            FactoryBankNavigationLink(bank: zoiaBank, showConfirmDelete: $showConfirmDelete)
+                        }
+                        if let zebuBank = model.factoryBank[.euroburo] {
+                            FactoryBankNavigationLink(bank: zebuBank, showConfirmDelete: $showConfirmDelete)
                         }
                         
                     }, label: {
@@ -94,10 +97,10 @@ struct SidebarNavigationView: View {
                     .navigationTitle(Text("Bank: \(bank.name)", comment: ""))
             } label: {
                 HStack {
-                    Image(systemName: bank.isFactoryBank ? "lock.square" : "person")
+                    Image(systemName: bank.bankType == .zoia || bank.bankType == .euroburo ? "lock.square" : "person")
                     Text(bank.name)
                     Spacer()
-                    if !bank.isFactoryBank {
+                    if bank.bankType == .user {
                         Image(systemName: "square.and.arrow.down")
                             .opacity(0.3)
                     }
@@ -126,10 +129,10 @@ struct SidebarNavigationView: View {
                     .navigationTitle(Text("Bank: \(bank.name)", comment: ""))
             } label: {
                 HStack {
-                    Image(systemName: bank.isFactoryBank ? "lock.square" : "person")
+                    Image(systemName: bank.bankType == .zoia || bank.bankType == .euroburo ? "lock.square" : "person")
                     Text(bank.name)
                     Spacer()
-                    if !bank.isFactoryBank {
+                    if bank.bankType == .user {
                         Image(systemName: "square.and.arrow.down")
                             .opacity(0.3)
                     }

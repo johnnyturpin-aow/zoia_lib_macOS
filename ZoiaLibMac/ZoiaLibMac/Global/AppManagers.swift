@@ -8,8 +8,6 @@
 import Foundation
 import AppKit
 
-
-
 final class AppRouter {
     static let shared = AppRouter()
     
@@ -22,36 +20,6 @@ final class AppRouter {
         }
     }
 }
-/*
-final class AppRouter {
-    
-    enum Path: String {
-        case nodeView = "/node-view"
-    }
-    
-    static let shared = AppRouter()
-    
-    static let scheme = "zoialib"
-    static let host = "com.polymorphicranch.zoia-lib-mac"
-    
-    // Unfortunately, a binary patch has no real uniquely identifying information
-    // So we use a combination of the patch name and the number of modules in the patch as its uniqueID
-    func openNodeView(patch: ParsedBinaryPatch) {
-        var components = URLComponents()
-        components.scheme = AppRouter.scheme
-        components.host = AppRouter.host
-        components.path = AppRouter.Path.nodeView.rawValue
-        components.queryItems = [
-            URLQueryItem(name: "name", value: patch.name),
-            URLQueryItem(name: "modules", value: patch.modules.count.description)
-        ]
-        
-        guard let url = components.url else { return }
-        NSWorkspace.shared.open(url)
-    }
-    
-}
- */
 
 final class AppFileManager {
     
@@ -61,6 +29,7 @@ final class AppFileManager {
     private static let tempFileFolderName = "temp"
     private static let banksFolderName = "Banks"
     private static let factoryBankFolderName = "Factory"
+    private static let factoryZebuBankFolderName = "Factory Euroburo"
     private static let editorFolderName = "Editor"
     
     static let bundleExtension = ".zbundle"
@@ -102,6 +71,12 @@ final class AppFileManager {
             .appendingPathComponent(AppFileManager.appFolderName)
             .appendingPathComponent(AppFileManager.banksFolderName)
             .appendingPathComponent(AppFileManager.factoryBankFolderName)
+    }
+    static func factoryZebuBankUrl() throws -> URL {
+        try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            .appendingPathComponent(AppFileManager.appFolderName)
+            .appendingPathComponent(AppFileManager.banksFolderName)
+            .appendingPathComponent(AppFileManager.factoryZebuBankFolderName)
     }
 }
 

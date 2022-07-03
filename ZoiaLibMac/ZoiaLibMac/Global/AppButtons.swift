@@ -16,9 +16,8 @@ struct NodeViewCommands: Commands {
         CommandMenu(Text("Layout")) {
             Picker(selection: $layoutAlgorithm, label: Text("Layout Algorithm")) {
                 Text(LayoutAlgorithm.singleRow.rawValue).tag(LayoutAlgorithm.singleRow)
-                Text(LayoutAlgorithm.simple.rawValue).tag(LayoutAlgorithm.simple)
+                Text(LayoutAlgorithm.compact.rawValue).tag(LayoutAlgorithm.compact)
                 Text(LayoutAlgorithm.simpleRecursive.rawValue).tag(LayoutAlgorithm.simpleRecursive)
-                Text(LayoutAlgorithm.moveChildNodes.rawValue).tag(LayoutAlgorithm.moveChildNodes)
                 Text(LayoutAlgorithm.splitAudioCV.rawValue).tag(LayoutAlgorithm.splitAudioCV)
             }
         }

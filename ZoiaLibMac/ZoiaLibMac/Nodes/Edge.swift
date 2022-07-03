@@ -1,7 +1,9 @@
-// GNU GENERAL PUBLIC LICENSE
-//   Version 3, 29 June 2007
-//
-// Copyright (c) 2022 Johnny Turpin (github.com/johnnyturpin-aow)
+/*---------------------------------------------------------------------------------------------
+ *  Copyright © Johnny Turpin (github.com/johnnyturpin-aow). All rights reserved.
+ *  GNU GENERAL PUBLIC LICENSE
+ *  Version 3, 29 June 2007
+ *--------------------------------------------------------------------------------------------*/
+
 
 import Foundation
 

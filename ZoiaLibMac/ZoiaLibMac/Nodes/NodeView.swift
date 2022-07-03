@@ -1,7 +1,9 @@
-// GNU GENERAL PUBLIC LICENSE
-//   Version 3, 29 June 2007
-//
-// Copyright (c) 2022 Johnny Turpin (github.com/johnnyturpin-aow)
+/*---------------------------------------------------------------------------------------------
+ *  Copyright © Johnny Turpin (github.com/johnnyturpin-aow). All rights reserved.
+ *  GNU GENERAL PUBLIC LICENSE
+ *  Version 3, 29 June 2007
+ *--------------------------------------------------------------------------------------------*/
+
 
 import SwiftUI
 
@@ -40,14 +42,12 @@ struct NodeView: View {
                 .frame(width: NodeView.nodeWidth, height: nodeHeight)
             
             RoundedRectangle(cornerRadius: 5)
-                //.fill(Color.black)
                 .fill(node.color)
                 .frame(width: NodeView.nodeWidth - 6, height: NodeView.titleHeight)
                 .offset(x: 3, y: 4)
                 .opacity(0.8)
-                //.opacity(0.2)
             
-            Text("\(node.name)[\(node.mod_idx)]")
+            Text("\(node.name)")
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(node.nodeLabelColor)
                 .frame(width: NodeView.nodeWidth, height: NodeView.titleHeight, alignment: .center)
@@ -116,16 +116,22 @@ struct NodeView: View {
     }
 }
 
+
+// .stroke(edge.isAudio ? Color("edgeStrokeColor") : Color("Color-15") , lineWidth: edge.isAudio ? 3 : 1)
 struct InputPortView: View {
     let port: Port
     
     var body: some View {
         HStack {
             Circle()
-                .fill( port.connections.isEmpty ? Color("Color-16") : Color("Color-11"))
+            // Color-16 = gray
+            // Color-11 = navy blue
+            // Color-5 = turqoise
+            
+                .fill( port.connections.isEmpty ? Color("Color-16") : (port.isAudioPort ? Color("Color-11") : Color("TagDistortion")))
                 .frame(width: NodeView.portDiameter, height: NodeView.portDiameter)
                 .overlay(Circle()
-                    .stroke( port.connections.isEmpty ? Color(red: 0.8, green: 0.8, blue: 0.8) : Color("Color-5"), lineWidth: 3))
+                    .stroke( port.connections.isEmpty ? Color(red: 0.8, green: 0.8, blue: 0.8) : (port.isAudioPort ? Color("Color-5") : Color("Color-15")), lineWidth: 3))
                 .padding(port.connections.isEmpty ? 0 : -4)
                 .overlay(Circle()
                     .fill(port.connections.isEmpty ? .clear : .white))
@@ -150,10 +156,12 @@ struct OutputPortView: View {
                 .font(.system(size: 11, weight: .regular))
                 .foregroundColor(Color.white)
             Circle()
-                .fill( port.connections.isEmpty ? Color("Color-16") : Color("Color-11"))
+                //.fill( port.connections.isEmpty ? Color("Color-16") : Color("Color-11"))
+                .fill( port.connections.isEmpty ? Color("Color-16") : (port.isAudioPort ? Color("Color-11") : Color("TagDistortion")))
                 .frame(width: NodeView.portDiameter, height: NodeView.portDiameter)
                 .overlay(Circle()
-                    .stroke( port.connections.isEmpty ? Color(red: 0.8, green: 0.8, blue: 0.8) : Color("Color-5"), lineWidth: 3))
+                    //.stroke( port.connections.isEmpty ? Color(red: 0.8, green: 0.8, blue: 0.8) : Color("Color-5"), lineWidth: 3))
+                    .stroke( port.connections.isEmpty ? Color(red: 0.8, green: 0.8, blue: 0.8) : (port.isAudioPort ? Color("Color-5") : Color("Color-15")), lineWidth: 3))
                 .padding(port.connections.isEmpty ? 0 : -4)
                 .overlay(Circle()
                     .fill(port.connections.isEmpty ? .clear : .white))

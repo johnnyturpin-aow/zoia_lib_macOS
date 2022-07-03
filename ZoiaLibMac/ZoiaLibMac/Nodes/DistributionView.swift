@@ -1,9 +1,9 @@
-//
-//  MapView.swift
-//  ZLIB
-//
-//  Created by Johnny Turpin on 6/2/22.
-//
+/*---------------------------------------------------------------------------------------------
+ *  Copyright © Johnny Turpin (github.com/johnnyturpin-aow). All rights reserved.
+ *  GNU GENERAL PUBLIC LICENSE
+ *  Version 3, 29 June 2007
+ *--------------------------------------------------------------------------------------------*/
+
 
 import SwiftUI
 

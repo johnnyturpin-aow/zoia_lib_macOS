@@ -13,51 +13,69 @@ struct FactoryList: Codable {
 
 class BankManager {
     
+    
+    static func saveFactoryBank(isZebu: Bool, completion: @escaping ()->Void) {
+        do {
+            let factoryBankUrl = try isZebu ? AppFileManager.factoryZebuBankUrl() : AppFileManager.factoryBankUrl()
+            if FileManager.default.fileExists(atPath: factoryBankUrl.path) {
+                completion()
+                return
+            }
+
+            try FileManager.default.createDirectory(at: factoryBankUrl, withIntermediateDirectories: true, attributes: nil)
+
+            var bundlePath: String?
+            // quick way to get path of bundle directory
+            if isZebu {
+                bundlePath = Bundle.main.path(forResource: "000_zoia_slightlyrandom", ofType: "bin", inDirectory: "Factory Euroburo")
+            } else {
+                bundlePath = Bundle.main.path(forResource: "000_zoia_Duck_Friends", ofType: "bin", inDirectory: "Factory")
+            }
+            guard let tempPath = bundlePath else { completion(); return }
+            let url = URL(fileURLWithPath: tempPath)
+            let bundledFactoryPath = url.deletingLastPathComponent()
+
+            // load all zoia patches in memory
+            let fileList = try FileManager.default.contentsOfDirectory(at: bundledFactoryPath, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+            for file in fileList {
+                let fileName = file.lastPathComponent
+                let (isZoiaFile, _, _) = BankManager.parseZoiaFileName(filename: fileName)
+                if isZoiaFile {
+                    let data = try Data(contentsOf: file)
+                    //loadedPatches[patchName ?? ""] = data
+                    let destFile = factoryBankUrl.appendingPathComponent(fileName)
+                    try data.write(to: destFile)
+                }
+            }
+            
+            var bankMetadata = BankMetadata()
+            bankMetadata.name = isZebu ? "Factory Euroburo" : "Factory"
+            bankMetadata.description = "Default Facotry Bank that ships with the \(isZebu ? "ZOIA Euroburo" : "ZOIA")"
+            bankMetadata.image_type = .icon
+            bankMetadata.icon = .waveform
+            bankMetadata.fg_color = CodableColor(color: .white)
+            bankMetadata.bg_color = CodableColor(color: Color("Color-11"))
+            bankMetadata.bankType = isZebu ? .euroburo : .zoia
+            bankMetadata.id = UUID().description
+            
+            let jsonData = try JSONEncoder().encode(bankMetadata)
+            let bankMetadataFile = factoryBankUrl.appendingPathComponent(bankMetadata.id! + ".json")
+            try jsonData.write(to: bankMetadataFile)
+            completion()
+          
+        } catch {
+            print("error occured")
+            completion()
+        }
+    }
+    
     // Note: Completion is called on background thread
     static func initFactoryBankIfNeeded(completion: @escaping ()->Void) {
         DispatchQueue.global(qos: .background).async {
-            do {
-                let factoryBankUrl = try AppFileManager.factoryBankUrl()
-                if FileManager.default.fileExists(atPath: factoryBankUrl.path) {
+            saveFactoryBank(isZebu: false) {
+                saveFactoryBank(isZebu: true) {
                     completion()
-                    return
                 }
-
-                try FileManager.default.createDirectory(at: factoryBankUrl, withIntermediateDirectories: true, attributes: nil)
- 
-                guard let tempPath = Bundle.main.path(forResource: "000_zoia_Duck_Friends", ofType: "bin", inDirectory: "Factory") else { completion(); return }
-                let url = URL(fileURLWithPath: tempPath)
-                let bundledFactoryPath = url.deletingLastPathComponent()
-
-                // load all zoia patches in memory
-                let fileList = try FileManager.default.contentsOfDirectory(at: bundledFactoryPath, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
-                for file in fileList {
-                    let fileName = file.lastPathComponent
-                    let (isZoiaFile, _, _) = BankManager.parseZoiaFileName(filename: fileName)
-                    if isZoiaFile {
-                        let data = try Data(contentsOf: file)
-                        //loadedPatches[patchName ?? ""] = data
-                        let destFile = factoryBankUrl.appendingPathComponent(fileName)
-                        try data.write(to: destFile)
-                    }
-                }
-                
-                var bankMetadata = BankMetadata()
-                bankMetadata.name = "Factory"
-                bankMetadata.description = "Default Facotry Bank that ships with the Zoia"
-                bankMetadata.image_type = .icon
-                bankMetadata.icon = .waveform
-                bankMetadata.fg_color = CodableColor(color: .white)
-                bankMetadata.bg_color = CodableColor(color: Color("Color-11"))
-                bankMetadata.is_factory = true
-                bankMetadata.id = UUID().description
-                
-                let jsonData = try JSONEncoder().encode(bankMetadata)
-                let bankMetadataFile = factoryBankUrl.appendingPathComponent(bankMetadata.id! + ".json")
-                try jsonData.write(to: bankMetadataFile)
-                completion()
-            } catch {
-                completion()
             }
         }
     }
@@ -434,12 +452,8 @@ class BankManager {
         }
         do {
                 let jsonDecoder = JSONDecoder()
-                
-                //let factoryFolder = try AppFileManager.factoryBankUrl()
-                let bankName = bankUrl.lastPathComponent
                 let fileList = try FileManager.default.contentsOfDirectory(at: bankUrl, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
                 
-                //let metadataPath = bankUrl.appendingPathComponent(bankName + ".json")
                 if let metadataPath = fileList.first(where: { $0.pathExtension.lowercased() == "json" }) {
                     let jsonData = try Data(contentsOf: metadataPath)
                     let bankMetadata = try jsonDecoder.decode(BankMetadata.self, from: jsonData)
@@ -452,9 +466,6 @@ class BankManager {
                             newBank.nsImage = NSImage(contentsOf: imagePath)
                         }
                     }
-                    
-                    let isFactory = bankName.lowercased() == "factory"
-                    newBank.isFactoryBank = isFactory
 
                     let attrs = try FileManager.default.attributesOfItem(atPath: bankUrl.path)
                     if let createDate = attrs[FileAttributeKey.creationDate] as? Date {
@@ -483,7 +494,6 @@ class BankManager {
                     completion(newBank)
                 }
             } catch {
-                print("error loading factory patches")
                 progress.completedUnitCount = progress.totalUnitCount
                 completion(nil)
             }

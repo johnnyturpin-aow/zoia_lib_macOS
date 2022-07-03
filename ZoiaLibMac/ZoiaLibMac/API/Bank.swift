@@ -8,6 +8,16 @@ import Foundation
 import SwiftUI
 
 
+
+enum BankType: String, Identifiable, Codable {
+    case user
+    case zoia
+    case euroburo
+    
+    var id: String {
+        return rawValue
+    }
+}
 struct BankMetadata: Codable {
     
     var name: String?
@@ -17,7 +27,7 @@ struct BankMetadata: Codable {
     var icon: Bank.BankImage.Icon?
     var fg_color: CodableColor?
     var bg_color: CodableColor?
-    var is_factory: Bool?
+    var bankType: BankType?
     var id: String?
 
 }
@@ -39,12 +49,15 @@ class Bank: Identifiable, Hashable, ObservableObject {
     @Published var nsImage: NSImage?
     @Published var isTargetedForDrop: Bool = false
     
+    var bankType: BankType = .user
+    
+    
     var numItems: Int {
         return orderedPatches.reduce(0, { $0 + ($1.patchType == PatchFile.PatchType.empty ? 0 : 1) })
     }
     
-    var isFactoryBank = false
-
+    //var isFactoryBank = false
+    
     static func == (lhs: Bank, rhs: Bank) -> Bool {
         return lhs.name == rhs.name
     }
@@ -70,7 +83,8 @@ class Bank: Identifiable, Hashable, ObservableObject {
         self.image.icon = metadata.icon ?? .waveformAndMic
         self.image.iconColor = metadata.fg_color?.color ?? .white
         self.image.backgroundColor = metadata.bg_color?.color ?? .blue
-        self.isFactoryBank = metadata.is_factory ?? false
+        //self.isFactoryBank = metadata.is_factory ?? false
+        self.bankType = metadata.bankType ?? .user
         self.id = metadata.id ?? self.id
         orderedPatches = Array(repeating: PatchFile(patchType: .empty), count: Bank.bankSize)
         
@@ -228,7 +242,7 @@ extension Bank {
                                         icon: self.image.icon,
                                         fg_color: CodableColor(color: self.image.iconColor),
                                         bg_color: CodableColor(color: self.image.backgroundColor),
-                                        is_factory: self.isFactoryBank,
+                                        bankType: self.bankType,
                                         id: self.id)
         return bankMetadata
     }

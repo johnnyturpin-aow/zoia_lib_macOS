@@ -139,9 +139,9 @@ class PatchDownloader: Identifiable, ObservableObject {
     
     // Creates a .zbundle folder (App specific package type)
     // Downloads the patch from patchstorage.com
-    // Downloads the first binary file found in the patch.json which matches ".bin"
+    // Downloads the first binary file found in the patch.json which matches ".bin" or ".zip"
     // Saves the patch json in the bundle
-    // Saves the binary patch ".bin" file in the bundle
+    // Saves the binary patch ".bin" file in the bundle ir expands the .zip archive and searches for the first .bin file
     func download(completion:  ((DownloadingState)->Void)? = nil) {
 
         cancellable?.cancel()
@@ -232,29 +232,62 @@ class PatchDownloader: Identifiable, ObservableObject {
                                 
                                 let fileList = try FileManager.default.contentsOfDirectory(at: fileDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
                                 for file in fileList {
-                                    let fileName = file.lastPathComponent
-                                    if fileName.suffix(4).lowercased() == ".bin" {
-                                        var updatedPatchName: String = "000_zoia_default.bin"
-                                        if fileName.first?.isNumber == true {
-                                            let (_, _, patchName) = BankManager.parseZoiaFileName(filename: fileName)
-                                            updatedPatchName = "000_zoia_" + String(patchName ?? "undefined")
-                                        } else {
-                                            updatedPatchName = "000_zoia_" + (patchJson.fileName ?? "patch" ) + ".bin"
+                                    
+                                    // TODO: Need to revisit this and do a proper recursive expansion until all .bin files have been extracted
+                                    if file.isDirectory == true {
+                                        let fileDir = try FileManager.default.contentsOfDirectory(at: file, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+                                        
+                                        for fp in fileDir {
+                                            let fileName = fp.lastPathComponent
+                                            if fileName.suffix(4).lowercased() == ".bin" {
+                                                var updatedPatchName: String = "000_zoia_default.bin"
+                                                if fileName.first?.isNumber == true {
+                                                    let (_, _, patchName) = BankManager.parseZoiaFileName(filename: fileName)
+                                                    updatedPatchName = "000_zoia_" + String(patchName ?? "undefined")
+                                                } else {
+                                                    updatedPatchName = "000_zoia_" + (patchJson.fileName ?? "patch" ) + ".bin"
+                                                }
+                                                let newFile = fileDirectory.appendingPathComponent(updatedPatchName, isDirectory: false)
+                                                try FileManager.default.moveItem(at: fp, to: newFile)
+                                                let jsonFileName = fileDirectory.appendingPathComponent(patchJson.id.description + ".json")
+                                                if FileManager.default.fileExists(atPath: jsonFileName.path) {
+                                                    try FileManager.default.removeItem(at: jsonFileName)
+                                                }
+                                                var updatedPatchJson: PatchStorage.Patch = patchJson
+                                                updatedPatchJson.is_zip_archive = true
+                                                let jsonData = try PatchStorageAPI.shared.jsonEncoder.encode(updatedPatchJson)
+                                                try jsonData.write(to: jsonFileName)
+                                                self?.setStateOnMain(newState: .completed)
+                                                completion?(.completed)
+                                                break
+                                            }
                                         }
-                                        let newFile = fileDirectory.appendingPathComponent(updatedPatchName, isDirectory: false)
-                                        try FileManager.default.moveItem(at: file, to: newFile)
-                                        let jsonFileName = fileDirectory.appendingPathComponent(patchJson.id.description + ".json")
-                                        if FileManager.default.fileExists(atPath: jsonFileName.path) {
-                                            try FileManager.default.removeItem(at: jsonFileName)
+                                    } else {
+                                        let fileName = file.lastPathComponent
+                                        if fileName.suffix(4).lowercased() == ".bin" {
+                                            var updatedPatchName: String = "000_zoia_default.bin"
+                                            if fileName.first?.isNumber == true {
+                                                let (_, _, patchName) = BankManager.parseZoiaFileName(filename: fileName)
+                                                updatedPatchName = "000_zoia_" + String(patchName ?? "undefined")
+                                            } else {
+                                                updatedPatchName = "000_zoia_" + (patchJson.fileName ?? "patch" ) + ".bin"
+                                            }
+                                            let newFile = fileDirectory.appendingPathComponent(updatedPatchName, isDirectory: false)
+                                            try FileManager.default.moveItem(at: file, to: newFile)
+                                            let jsonFileName = fileDirectory.appendingPathComponent(patchJson.id.description + ".json")
+                                            if FileManager.default.fileExists(atPath: jsonFileName.path) {
+                                                try FileManager.default.removeItem(at: jsonFileName)
+                                            }
+                                            var updatedPatchJson: PatchStorage.Patch = patchJson
+                                            updatedPatchJson.is_zip_archive = true
+                                            let jsonData = try PatchStorageAPI.shared.jsonEncoder.encode(updatedPatchJson)
+                                            try jsonData.write(to: jsonFileName)
+                                            self?.setStateOnMain(newState: .completed)
+                                            completion?(.completed)
+                                            break
                                         }
-                                        var updatedPatchJson: PatchStorage.Patch = patchJson
-                                        updatedPatchJson.is_zip_archive = true
-                                        let jsonData = try PatchStorageAPI.shared.jsonEncoder.encode(updatedPatchJson)
-                                        try jsonData.write(to: jsonFileName)
-                                        self?.setStateOnMain(newState: .completed)
-                                        completion?(.completed)
-                                        break
                                     }
+
                                 }
 
                             } else if patchJson.fileName?.suffix(4).lowercased() == ".bin" {

@@ -12,7 +12,7 @@ struct BanksListContainer: View {
     
     @EnvironmentObject private var model: AppViewModel
     var body: some View {
-        if bank.isFactoryBank {
+        if bank.bankType == .zoia || bank.bankType == .euroburo {
             FactoryListView(bank: bank)
         } else {
             BanksListView(bank: bank)
@@ -44,6 +44,10 @@ struct FactoryListView: View {
                         BankPatchDetailView()
                     } label: {
                         BankRowView(patch: patch, index: i)
+                    }
+                    .onChange(of: model.selectedFactoryPatchId) {
+                        newValue in
+                        model.onSelectedFactoryPatchDidChange(bankType: bank.bankType)
                     }
                 }
 

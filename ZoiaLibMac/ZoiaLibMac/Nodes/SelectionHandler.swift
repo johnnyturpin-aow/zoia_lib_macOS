@@ -47,6 +47,7 @@ class SelectionHandler: ObservableObject {
     
     @Published var draggingNodes: [DragInfo] = []
     @Published private(set) var selectedNodeIDs: [NodeID] = []
+
     
     func selectNode(_ node: Node) {
         print("selecting node with ID = \(node.mod_idx)")
