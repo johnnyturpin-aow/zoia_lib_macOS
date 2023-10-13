@@ -464,11 +464,15 @@ class NodeCanvas: ObservableObject {
         nodes = placedNodes
     }
     
+    // A layout algorithm that tries to split the layout into two horizontal "rows"
+    // the top horizontal collection are all of the cv modules
+    // the bottom horizontal collection are all of the audio modules
     func layoutNodesSplitAudioCV() {
 
         layoutNodesInSingleRow()
         placeConnections()
         
+        // these nodes are the known output modules - always try to place them in last column of layout
         let output_node = nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 2 }) ??
         nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 95 }) ??
         nodes.first(where: { patch?.parsedPatchFile?.modules.item(at: $0.mod_idx)?.ref_mod_idx == 96 }) ??
@@ -563,6 +567,7 @@ class NodeCanvas: ObservableObject {
         edges = []
     }
 
+    // this needs a lot of work in order to properly lay out patches with lots of feedback and patches with lots of UI / button modules
     func layoutNodesRecursive() {
         
         // we start off by placing nodes in single row (this filters out the non visible nodes)

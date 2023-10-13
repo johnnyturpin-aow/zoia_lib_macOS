@@ -38,7 +38,7 @@ struct Endpoint<Kind: EndpointKind, Response: Decodable> {
         if path.first == "/" {
             p1 = String(path.dropFirst())
         }
-        components.path = "/api/alpha/" + p1
+        components.path = "/api/beta/" + p1
         components.queryItems = queryItems.isEmpty ? nil : queryItems
 
         // If either the path or the query items passed contained
@@ -86,21 +86,21 @@ enum CustomError: Error, CustomStringConvertible, LocalizedError {
 struct EndpointFactory {
     
     // get detailed info about a specific patch
-    // https://patchstorage.com/api/alpha/patches/150831
+    // https://patchstorage.com/api/beta/patches/150831
     public static func getZoiaPatch(patchId: String) -> Endpoint<EndpointKinds.Get, PatchStorage.Patch> {
         return Endpoint(path: "patches/\(patchId)", queryItems: [])
     }
     
     // get list of platforms to find Zoia Platform ID
-    // https://patchstorage.com/api/alpha/platforms?per_page=100
+    // https://patchstorage.com/api/beta/platforms?per_page=100
     
-    // https://patchstorage.com/api/alpha/platforms?per_page=100
+    // https://patchstorage.com/api/beta/platforms?per_page=100
     public static func getAllPlatforms() -> Endpoint<EndpointKinds.Get, [PatchStorage.Platform]> {
         return Endpoint(path: "platforms", queryItems: [URLQueryItem(name: "per_page", value: "100")])
     }
     
     // using Zoia ID, request list of patches
-    // https://patchstorage.com/api/alpha/patches?per_page=100&platforms=3003
+    // https://patchstorage.com/api/beta/patches?per_page=100&platforms=3003
     public static func getPageOfPatches(zoiaPlatformId: String, sortBy: SortByItems, sortOrder: SortOrderItems, page: Int, pageSize: Int, categories: String?, tagsIncluded: String?, searchQuery: String?) -> Endpoint<EndpointKinds.Get, [PatchStorage.Patch]> {
         
         var queryItems = [            URLQueryItem(name: "per_page", value: pageSize.description),
@@ -226,6 +226,9 @@ class PatchStorageAPI {
 
         getAllPlatforms {
             platformList in
+			if let zoiaPlatform = platformList.first(where: {  $0.slug == "zoia"}) {
+				print("zoia platform ID = \(zoiaPlatform.id)")
+			}
             completion( platformList.first(where: {$0.slug == "zoia"})?.id )
         }
     }

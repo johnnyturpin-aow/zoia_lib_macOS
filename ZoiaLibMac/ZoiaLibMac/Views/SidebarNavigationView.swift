@@ -32,7 +32,7 @@ struct SidebarNavigationView: View {
                         Label("Browse", systemImage: "square.grid.2x2")
                     }
                     
-                    .help("Browses http://patchstorage.com for Zoia Patches")
+                    .help("Browses patchstorage.com for Zoia Patches")
                     NavigationLink(tag: NavigationItem.library.rawValue, selection: $model.currentSidebarSelection) {
                         LocalPatchContainer()
                             .navigationTitle("Library")

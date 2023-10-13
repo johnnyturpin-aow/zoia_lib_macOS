@@ -132,6 +132,7 @@ class AppViewModel: ObservableObject {
     
     init() {
 
+		print("AppViewModel init!")
         allLibraryFilters = LibraryFilterType.allCases.map { $0.rawValue }
         setupInitialAPILoadListeners()
         

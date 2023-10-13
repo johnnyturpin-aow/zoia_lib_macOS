@@ -143,7 +143,7 @@ struct PatchDownloadButton: View {
     
     var body: some View {
         VStack {
-            Spacer()
+           // Spacer()
             HStack {
                 switch patchDownloader.state {
                 case .invalidFile:
@@ -258,23 +258,24 @@ struct PatchDownloadButton: View {
                     }
                 }
             }
+			.padding(.top, 3)
             .padding(.bottom, 1)
             if subText2 == nil {
                 Text(subText)
-                    .font(.system(size: 12, weight: .regular))
+                    .font(.system(size: 11, weight: .regular))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .padding(0)
                     .frame(width: CloudPatchRow.nameWidth, alignment: .center)
             } else {
                 Text(subText)
-                    .font(.system(size: 12, weight: .regular))
+                    .font(.system(size: 11, weight: .regular))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .frame(width: CloudPatchRow.nameWidth, alignment: .center)
                     .padding(0)
                 Text("(ver: \(subText2 ?? ""))")
-                    .font(.system(size: 10, weight: .light))
+                    .font(.system(size: 9, weight: .light))
                     .foregroundColor(Color.init(red: 0.6, green: 0.6, blue: 0.6))
                     .frame(width: CloudPatchRow.nameWidth, alignment: .center)
             }
