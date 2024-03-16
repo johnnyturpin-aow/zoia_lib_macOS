@@ -72,7 +72,7 @@ class AppViewModel: ObservableObject {
 
     
     // MARK: - Sorting and Filtering Properties
-    @Published var searchQuery = "" { didSet { onListFilteringChange() }}
+    @Published var searchQuery = "" { didSet { doThrottledSearch() }}
     @Published var sortBySelection: SortByItems = .modified {  didSet { onListFilteringChange() }}
     @Published var orderSelection: SortOrderItems = .desc { didSet { onListFilteringChange() }}
     @Published var tagFilters: [PatchStorage.GenericObject] = [] { didSet { onListFilteringChange() }}
@@ -84,6 +84,17 @@ class AppViewModel: ObservableObject {
     
     @Published var libraryFilters = LibraryFilter.default
     @Published private(set) var allLibraryFilters: [String] = []
+	
+	var searchThrottle: Timer?
+	
+	
+	func doThrottledSearch() {
+		searchThrottle?.invalidate()
+		searchThrottle = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) {
+			[weak self] timer in
+			self?.onListFilteringChange()
+		}
+	}
     
     struct CategoryFilter: Hashable {
         var hidden: Set<String> = []
@@ -447,7 +458,7 @@ class AppViewModel: ObservableObject {
                 print("number patches received = \(patchData.count)")
                 self.unfilteredCloudPatchList = self.unfilteredCloudPatchList.union(Set(patchData))
                 self.page += 1
-                self.canLoadNextPage = (patchData.count <= self.pageSize)
+                self.canLoadNextPage = (patchData.count == self.pageSize)
             })
             .store(in: &subscription)
     }

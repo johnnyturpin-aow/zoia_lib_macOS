@@ -49,7 +49,10 @@ class EmpressReference {
             }
         }
     }
-    
+	
+	
+
+	
     func loadModuleList(completion: @escaping ()->Void) {
         
 
@@ -59,23 +62,7 @@ class EmpressReference {
                     let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
                     let decoder = JSONDecoder()
                     self.moduleList = try decoder.decode([String: EmpressReference.Module].self, from: data)
-                    
-                    // used to modify python style .json file into a statically ordered list
-//                    var reordererModuleList: EmpressModuleList = [:]
-//                    for (name, var module) in self.moduleList {
-//                        var newblocks = module.blocks.sorted(by: { lhs, rhs in
-//                            let lhs_pos = lhs.values.first?.position ?? 0
-//                            let rhs_pos = rhs.values.first?.position ?? 0
-//                            return lhs_pos < rhs_pos
-//                        })
-//                        module.blocks = newblocks
-//                        reordererModuleList[name] = module
-//                    }
-//                    let tempPath = try AppFileManager.appSupportUrl().appendingPathComponent("fixed_module_list.json")
-//                    let output = try JSONEncoder().encode(reordererModuleList)
-//                    try output.write(to: tempPath)
-                    
-                    
+    
                     completion()
                 }
                 catch let error {
@@ -85,6 +72,19 @@ class EmpressReference {
             }
         }
     }
+	
+	struct ModuleIndexModule: Codable {
+		let category: String
+		let cpu: Double
+		let default_blocks: Int
+		let description: String
+		let max_blocks: Int
+		let min_blocks: Int
+		let name: String
+		var blocks: ModuleBlock
+		var options: ModuleOption
+		var params: Int
+	}
     
     struct Module: Codable {
         
@@ -112,3 +112,46 @@ class EmpressReference {
     }
 }
 
+/*
+ // python code to export ModuleIndex.json in appropriate formats for swift
+ 
+
+	 module_iterator = mod.copy()
+
+	 all_modules = []
+	 for index in module_iterator:
+		 module = module_iterator[index]
+		 #label = {index: module["name"]}
+		 module_name = module["name"].lower().replace(" ","_")
+		 label = 'case: {} = {}'.format(module_name, index)
+		 all_modules.append(label)
+
+ with open('/Users/jturpin/Library/Application Support/ZoiaLib/all_modules.json', 'w') as fs:
+	 json.dump(all_modules, fs)
+
+
+
+	 fixed_mod = mod.copy()
+
+	 # loop over all root level objects (these are modules referenced using a string name - which is their index)
+	 # for each module, convert the options dictionary into an ordered array
+	 for index in fixed_mod:
+		 ordered_options = []
+		 module = fixed_mod[index]
+		 opts = module["options"]
+		 for opt_name, opt_value in opts.items():
+			 ordered_options.append({opt_name: opt_value})
+		 module["options"] = ordered_options
+
+		 ordered_blocks = []
+		 blocks = module["blocks"]
+		 for block_name, block_value in blocks.items():
+			 ordered_blocks.append({block_name: block_value})
+		 module["blocks"] = ordered_blocks
+
+	 
+ with open('/Users/jturpin/Library/Application Support/ZoiaLib/module_index.json', 'w') as fs:
+	 json.dump(fixed_mod,fs)
+
+
+ */

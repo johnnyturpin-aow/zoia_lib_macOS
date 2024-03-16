@@ -102,15 +102,19 @@ struct EndpointFactory {
     // using Zoia ID, request list of patches
     // https://patchstorage.com/api/beta/patches?per_page=100&platforms=3003
     public static func getPageOfPatches(zoiaPlatformId: String, sortBy: SortByItems, sortOrder: SortOrderItems, page: Int, pageSize: Int, categories: String?, tagsIncluded: String?, searchQuery: String?) -> Endpoint<EndpointKinds.Get, [PatchStorage.Patch]> {
-        
+		if let search = searchQuery {
+			print("performing a search query = \(search)")
+		} else {
+			
+		}
         var queryItems = [            URLQueryItem(name: "per_page", value: pageSize.description),
                                       URLQueryItem(name: "page", value: page.description),
                                       URLQueryItem(name: "platforms", value: zoiaPlatformId),
                                       URLQueryItem(name: "order", value: sortOrder.rawValue),
                                       URLQueryItem(name: "orderby", value: sortBy.rawValue),
-                                      URLQueryItem(name: "categories", value: categories),
+									  URLQueryItem(name: "categories", value: searchQuery == nil ? categories : nil),
                                       URLQueryItem(name: "search", value: searchQuery),
-                                      URLQueryItem(name: "tags", value: tagsIncluded)
+									  URLQueryItem(name: "tags", value: searchQuery == nil ? tagsIncluded : nil)
         
         ]
         // URLSession doesn't filter nil query items - so do it manually
@@ -191,6 +195,7 @@ class PatchStorageAPI {
         let categoryList: String? = (categories == nil) || (categories?.isEmpty == true) ? nil : categories?.map{ $0.description }.joined(separator: ",")
         let tagList: String? = (tagsIncluded == nil) || (tagsIncluded?.isEmpty == true) ? nil : tagsIncluded?.map{ $0.description }.joined(separator: ",")
         let request = EndpointFactory.getPageOfPatches(zoiaPlatformId: "3003", sortBy: sortBy, sortOrder: sortOrder, page: page, pageSize: pageSize, categories: categoryList, tagsIncluded: tagList, searchQuery: searchQuery).makeRequest(with: ())!
+		print("request = \(request.url?.absoluteString ?? "")")
         return urlSession.dataTaskPublisher(for: request)
             .map(\.data)
             .decode(type: [PatchStorage.Patch].self, decoder: jsonDecoder)
@@ -234,25 +239,23 @@ class PatchStorageAPI {
     }
 }
 
-
-// how to debug results from server:
-
-//            .tryMap { (output) -> Data in
-//
-//                guard let response = output.response as? HTTPURLResponse, response.statusCode >= 200 && response.statusCode < 300 else {
-//                    print("bad server response") // debug statement
-//                    throw URLError(.badServerResponse)
-//                }
-//
-//                print("got output") // debug statement
-//                if let dataString = String(data: output.data, encoding: .utf8) { // debug statement
-//                        print("got dataString: \n\(dataString)") // debug statement
-//                    } // debug statement
-//                return output.data
-//
-//            }
-
-
+/*
+ //			.tryMap { (output) -> Data in
+ //				guard let response = output.response as? HTTPURLResponse else {
+ //					print("bad server response") // debug statement
+ //
+ //					throw URLError(.badServerResponse)
+ //				}
+ //				if response.statusCode > 300 {
+ //					print("response.statusCode is weird = \(response.statusCode)")
+ //				}
+ //				print("got output") // debug statement
+ //				if let dataString = String(data: output.data, encoding: .utf8) { // debug statement
+ //					print("got dataString: \n\(dataString)") // debug statement
+ //				}
+ //				return output.data
+ //			}
+ */
 /*
 
  

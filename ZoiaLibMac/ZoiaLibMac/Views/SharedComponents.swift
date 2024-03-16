@@ -69,14 +69,15 @@ struct WrappingRoundedRectTagView: View {
                 onTapped(tag)
             }
             .buttonStyle(PlainButtonStyle())
-                .font(.system(size: 12, weight: .regular))
+                .font(.system(size: 10, weight: .regular))
                 .foregroundColor(self.tagColorForTag(tagName: tag.name))
                 .padding(3)
                 .background(Color.clear)
                 .overlay(RoundedRectangle(cornerRadius: 5)
                     .stroke(self.tagColorForTag(tagName: tag.name)))
                 .clipShape(RoundedRectangle(cornerRadius: 5))
-                .padding(.top, 5)
+                .padding(.top, 2)
+				.padding(.bottom, 2)
                 
         }
     }
@@ -130,7 +131,7 @@ struct PatchCategoryView: View {
 struct PatchDownloadButton: View {
 
     @ObservedObject var patchDownloader: PatchDownloader
-    static let downloadIconSize: CGFloat = 36.0
+	static let downloadIconSize: CGFloat = 28.0
     @State private var downloadButtonHover = false
     
     @EnvironmentObject private var model: AppViewModel
@@ -258,8 +259,7 @@ struct PatchDownloadButton: View {
                     }
                 }
             }
-			.padding(.top, 3)
-            .padding(.bottom, 1)
+
             if subText2 == nil {
                 Text(subText)
                     .font(.system(size: 11, weight: .regular))
@@ -281,6 +281,8 @@ struct PatchDownloadButton: View {
             }
             Spacer()
         }
+		.padding(.top, 5)
+		.padding(.bottom, 1)
         .frame(width: width)
     }
 }

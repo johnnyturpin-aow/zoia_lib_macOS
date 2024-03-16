@@ -13,7 +13,7 @@ struct ZoiaLibMacApp: App {
     
     @StateObject private var appModel = AppViewModel()
     @State var showConfirmBankDelete: Bool = false
-    @State var customScheme: AppearanceOptions = .System
+    @State var customScheme: AppearanceOptions = AppearanceOptions()
     @Environment(\.scenePhase) private var scenePhase
     
     @State var minSize:CGSize = {
@@ -27,7 +27,7 @@ struct ZoiaLibMacApp: App {
             ContentView(showConfirmDelete: $showConfirmBankDelete)
                 .environmentObject(appModel)
                 .padding(.bottom, 1)
-                .frame(minWidth: 800, minHeight: 400)
+                .frame(minWidth: 800, minHeight: 800)
                 .alert(isPresented: $appModel.alerter.isShowingAlert) {
                     appModel.alerter.alert ?? Alert(title: Text(""))
                 }
@@ -47,7 +47,7 @@ struct ZoiaLibMacApp: App {
                 })
                 .onChange(of: customScheme, perform: {
                     newValue in
-                    print("customScheme changed: \(newValue.rawValue)")
+					UserDefaults.standard.set(newValue.rawValue, forKey: "AppInterfaceStyle")
                 })
                 .preferredColorScheme(customScheme == .System ?
                                       AppearanceOptions() == .Light ? .light : .dark :

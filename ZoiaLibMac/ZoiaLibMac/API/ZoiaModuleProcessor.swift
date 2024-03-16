@@ -116,6 +116,7 @@ enum ZoiaModuleProcessor: Int {
     case sampler = 102
     case device_control = 103
     case cv_mixer = 104
+	case logic_gate = 105
 
     func calculate_blocks_in_module(module: ParsedBinaryPatch.Module) -> [ModuleBlock] {
         var blocks: [ModuleBlock] = []
@@ -824,18 +825,26 @@ enum ZoiaModuleProcessor: Int {
             blocks.append(d[3])
             
         case 102:
-            blocks = [d[0]]
-            if module.options.first(where: { $0.key == "record" })?.value.asString == "enabled" {
-                blocks.append(d[1])
-            }
-            blocks.append(d[2])
-            blocks.append(d[3])
-            blocks.append(d[4])
-            blocks.append(d[5])
-            if module.options.first(where: { $0.key == "cv_output" })?.value.asString == "on" {
-                blocks.append(d[6])
-            }
-            blocks.append(d[7])
+			blocks = []
+			blocks = [d[0]]
+			if module.options.first(where: { $0.key == "record" })?.value.asString != "disabled" {
+				blocks.append(d[0])
+				blocks.append(d[1])
+				blocks.append(d[2])
+			}
+			blocks.append(d[3])
+			blocks.append(d[4])
+			if module.options.first(where: { $0.key == "reverse_button" })?.value.asString == "on" {
+				blocks.append(d[5])
+			}
+			blocks.append(d[6])
+			blocks.append(d[7])
+			if module.options.first(where: { $0.key == "cv_outputs" })?.value.asString == "on" {
+				blocks.append(d[8])
+				blocks.append(d[9])
+			}
+			blocks.append(d[10])
+			blocks.append(d[11])
             
         case 103:
             switch module.options.first?.value.asString {
@@ -846,10 +855,6 @@ enum ZoiaModuleProcessor: Int {
             default:
                 blocks = [d[2]]
             }
-            
-            
-            
-            
         case 104:
             blocks = []
             if let num_channels = module.options.first(where: { $0.key == "num_channels"} )?.value.asInt {
@@ -861,7 +866,26 @@ enum ZoiaModuleProcessor: Int {
                 }
             }
             blocks.append(d[16])
-            
+			
+		// logic gate
+		case 105:
+			blocks = [d[0]]
+			if module.options.first(where: { $0.key == "operation" })?.value.asString != "NOT" {
+				let num_inputs = (module.options.first(where: { $0.key == "num_of_inputs"} )?.value.asInt ?? 2) + 1
+				for index in 2..<num_inputs {
+					blocks.append(d[index - 1])
+				}
+				if module.options.first(where: { $0.key == "threshold" })?.value.asString == "on" {
+					blocks.append(d[38])
+				}
+				blocks.append(d[39])
+				
+			} else {
+				if module.options.first(where: { $0.key == "threshold" })?.value.asString == "on" {
+					blocks.append(d[38])
+				}
+				blocks.append(d[39])
+			}
             
             
         default:
@@ -873,48 +897,4 @@ enum ZoiaModuleProcessor: Int {
     
 }
 
-
-/*
- // python code to export ModuleIndex.json in appropriate formats for swift
- 
-
-     module_iterator = mod.copy()
-
-     all_modules = []
-     for index in module_iterator:
-         module = module_iterator[index]
-         #label = {index: module["name"]}
-         module_name = module["name"].lower().replace(" ","_")
-         label = 'case: {} = {}'.format(module_name, index)
-         all_modules.append(label)
-
- with open('/Users/jturpin/Library/Application Support/ZoiaLib/all_modules.json', 'w') as fs:
-     json.dump(all_modules, fs)
-
-
-
-     fixed_mod = mod.copy()
-
-     # loop over all root level objects (these are modules referenced using a string name - which is their index)
-     # for each module, convert the options dictionary into an ordered array
-     for index in fixed_mod:
-         ordered_options = []
-         module = fixed_mod[index]
-         opts = module["options"]
-         for opt_name, opt_value in opts.items():
-             ordered_options.append({opt_name: opt_value})
-         module["options"] = ordered_options
-
-         ordered_blocks = []
-         blocks = module["blocks"]
-         for block_name, block_value in blocks.items():
-             ordered_blocks.append({block_name: block_value})
-         module["blocks"] = ordered_blocks
-
-     
- with open('/Users/jturpin/Library/Application Support/ZoiaLib/module_index.json', 'w') as fs:
-     json.dump(fixed_mod,fs)
-
-
- */
 

@@ -72,7 +72,19 @@ extension PatchStorage {
     
     static func colorForTagSelected(tagName: String?) -> Color? {
         
-        if tagName?.lowercased().contains("delay") == true || tagName?.lowercased().contains("multi-tap") == true || tagName?.lowercased().contains("ping") == true {
+		if tagName?.lowercased().contains("midi") == true || tagName?.lowercased().contains("clock") == true {
+			return Color.init("TagMidiSelected")
+		}
+		if tagName?.lowercased().contains("sample") == true || tagName?.lowercased().contains("loop") == true {
+			return Color.init("TagSamplerSelected")
+		}
+		if tagName?.lowercased().contains("ambient") == true {
+			return Color.init("TagAmbientSelected")
+		}
+		if tagName?.lowercased().contains("synth") == true || tagName?.lowercased().contains("drone") == true {
+			return Color.init("TagSynthSelected")
+		}
+        if tagName?.lowercased().contains("delay") == true || tagName?.lowercased().contains("multi-tap") == true || tagName?.lowercased().contains("ping") == true || tagName?.lowercased().contains("granular") == true || tagName?.lowercased().contains("grain") == true || tagName?.lowercased().contains("echo") == true {
             return Color.init("TagDelaySelected")
         }
         if tagName?.lowercased().contains("reverb") == true {
@@ -90,7 +102,23 @@ extension PatchStorage {
     
     static func colorForTag(tagName: String?) -> Color? {
         
-        if tagName?.lowercased().contains("delay") == true || tagName?.lowercased().contains("multi-tap") == true || tagName?.lowercased().contains("ping") == true {
+		if tagName?.lowercased().contains("midi") == true || tagName?.lowercased().contains("clock") == true {
+			return Color.init("TagMidi")
+		}
+		
+		if tagName?.lowercased().contains("sample") == true || tagName?.lowercased().contains("loop") == true {
+			return Color.init("TagSampler")
+		}
+		
+		if tagName?.lowercased().contains("ambient") == true {
+			return Color.init("TagAmbient")
+		}
+		
+		if tagName?.lowercased().contains("synth") == true || tagName?.lowercased().contains("drone") == true  {
+			return Color.init("TagSynth")
+		}
+		
+        if tagName?.lowercased().contains("delay") == true || tagName?.lowercased().contains("multi-tap") == true || tagName?.lowercased().contains("ping") == true || tagName?.lowercased().contains("granular") == true || tagName?.lowercased().contains("grain") == true || tagName?.lowercased().contains("echo") == true {
             return Color.init("TagDelay")
         }
         if tagName?.lowercased().contains("reverb") == true {

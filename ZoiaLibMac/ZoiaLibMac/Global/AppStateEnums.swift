@@ -26,7 +26,7 @@ enum AppearanceOptions: String, Identifiable, CaseIterable {
     var id: String { rawValue }
     
     init() {
-        let type = UserDefaults.standard.string(forKey: "AppleInterfaceStyle") ?? "Light"
+        let type = UserDefaults.standard.string(forKey: "AppInterfaceStyle") ?? "Light"
         self = AppearanceOptions(rawValue: type)!
     }
 }

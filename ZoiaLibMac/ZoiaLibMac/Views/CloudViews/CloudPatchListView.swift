@@ -12,16 +12,25 @@ struct PatchListContainer: View {
     @EnvironmentObject private var model: AppViewModel
     var sortByItems: [SortByItems] = SortByItems.allCases
     var orderByItems: [SortOrderItems] = SortOrderItems.allCases
-    
+	
     let showToolbarHere = false
     
     var body: some View {
         CloudPatchListView()
             .onAppear(perform: model.fetchNextPageIfPossible)
             .searchable(text: $model.searchQuery)
+			//.searchable(text: $searchQuery)
             .onSubmit(of: .search) {
-                print("searching for: \($model.searchQuery)")
+                
             }
+//			.onChange(of: searchQuery) {
+//				searchText in
+//				searchTextPublisher.send(searchText)
+//			}
+//			.onReceive(searchTextPublisher.debounce(for: .milliseconds(500), scheduler: DispatchQueue.main), perform: { debouncedText in
+//				print("debounced Search = \(debouncedText)")
+//				model.searchQuery = debouncedText
+//			})
             .toolbar {
                 ToolbarItemGroup(placement: .automatic) {
                     if model.tagFilters.count > 0 {

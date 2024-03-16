@@ -180,6 +180,8 @@ struct ParsedBinaryPatch: Identifiable {
     var estimated_cpu_str: String = ""
     var patch_io: IO = IO()
     
+	var maxPageNumber: Int = 0
+	
     struct Page: Identifiable {
         let id = UUID()
         
@@ -369,6 +371,9 @@ struct ParsedBinaryPatch: Identifiable {
         
         // process basic module metadata
         var curr_step = 6
+		patch.maxPageNumber = 0
+		
+
         for i in 0..<num_modules {
             let size = data[curr_step]
             var module = ParsedBinaryPatch.Module()
@@ -380,6 +385,11 @@ struct ParsedBinaryPatch: Identifiable {
             module.refName = refModule?.name
             module.version = Int(data[curr_step + 2])
             module.pageNumber = Int(data[curr_step + 3])
+			
+			// EuroBuro buttons are hardcoded to page #127
+			if module.pageNumber != 127 {
+				patch.maxPageNumber = max(patch.maxPageNumber, module.pageNumber)
+			}
 
             let name_start_index = (curr_step + (Int(size) - 4)) * 4
             let name_end_index = (curr_step + (Int(size) - 4)) * 4 + 16
@@ -443,6 +453,7 @@ struct ParsedBinaryPatch: Identifiable {
             patch.modules.append(module)
         }
 
+		//print("calculate maxPageNumber = \(patch.maxPageNumber)")
         patch.connections = []
         //# Extract the connection data for each connection in the patch.
         let num_connections = Int(data[curr_step])
@@ -467,6 +478,8 @@ struct ParsedBinaryPatch: Identifiable {
         
         patch.pages = []
         curr_step += 1
+		
+		// I think this is named pages only
         let num_pages = Int(data[curr_step])
         for i in 0..<num_pages {
             let page_name_start = (curr_step + 1) * 4
@@ -478,18 +491,15 @@ struct ParsedBinaryPatch: Identifiable {
             patch.pages.append(page)
             curr_step += 4
         }
-        
-        // this is not right... there is something buggy with the pageNumber for some of these modules
-        // reporting a page# of 127 while num_pages = 9
-        
-        // now figre out if there are unnamed pages, and insert into pages array with empty name
-        //let last_referenced_page = patch.modules.count > 0 ? (patch.modules.last?.pageNumber ?? 0) + 1 : 1
-        
-//        let n_pages = patch.modules.count > 0 ? (patch.modules.last?.pageNumber ?? 0) + 1 : 1
-//        while patch.pages.count < n_pages {
-//            let page = BinaryPatchData.Page(name: "", buttons: empty_buttons)
-//            patch.pages.append(page)
-//        }
+		if patch.pages.isEmpty {
+			let n_pages = patch.maxPageNumber
+			var index: Int = 0
+			while patch.pages.count < n_pages {
+				let page = ParsedBinaryPatch.Page(name: "", index: index)
+				patch.pages.append(page)
+				index += 1
+			}
+		}
 
         curr_step += 1
         let num_starred = Int(data[curr_step])
@@ -538,11 +548,11 @@ struct ParsedBinaryPatch: Identifiable {
         patch.modules = ParsedBinaryPatch.create_io_blocks(patch: patch)
         patch.blockConnections = ParsedBinaryPatch.make_block_connections(patch: patch)
         
+		
         for module in patch.modules {
             // only update buttons for modules in actual pages - some patches have modules in page 127??? - see Spectre
             if module.pageNumber < patch.pages.count {
                 var page = patch.pages[module.pageNumber]
-                
                 let skipButton = false
                 // is it a UI button with a value 0? lets not show it as button in the UI
                 if !skipButton {
@@ -566,6 +576,7 @@ struct ParsedBinaryPatch: Identifiable {
                 patch.pages[module.pageNumber] = page
             }
         }
+		
         return patch
     }
     
@@ -615,10 +626,12 @@ struct ParsedBinaryPatch: Identifiable {
             
             if source_module == nil || dest_module == nil {
                 print("this is bad")
+				continue
             }
             
             if source_block == nil || dest_block == nil {
                 print("this is also bad")
+				continue
             }
             
             if source_module?.output_blocks.contains(where: { $0.keys.first == source_block?.keys.first }) == false {
@@ -881,3 +894,43 @@ struct ByteParser {
     }
 }
 
+
+
+/*
+ #     print("loading ModuleIndex.json")
+ #     module_iterator = mod.copy()
+ #
+ #     all_modules = []
+ #     for index in module_iterator:
+ #         module = module_iterator[index]
+ #         # label = {index: module["name"]}
+ #         module_name = module["name"].lower().replace(" ", "_")
+ #         label = 'case: {} = {}'.format(module_name, index)
+ #         all_modules.append(label)
+ #
+ # # with open('/Users/jturpin/Library/Application Support/ZoiaLib/all_modules.json', 'w') as fs:
+ # with open('all_modules.json', 'w') as fs:
+ #     json.dump(all_modules, fs)
+ #
+ #     fixed_mod = mod.copy()
+ #
+ #     # loop over all root level objects (these are modules referenced using a string name - which is their index)
+ #     # for each module, convert the options dictionary into an ordered array
+ #     for index in fixed_mod:
+ #         ordered_options = []
+ #         module = fixed_mod[index]
+ #         opts = module["options"]
+ #         for opt_name, opt_value in opts.items():
+ #             ordered_options.append({opt_name: opt_value})
+ #         module["options"] = ordered_options
+ #
+ #         ordered_blocks = []
+ #         blocks = module["blocks"]
+ #         for block_name, block_value in blocks.items():
+ #             ordered_blocks.append({block_name: block_value})
+ #         module["blocks"] = ordered_blocks
+ #
+ # with open('module_index.json', 'w') as fs:
+ #     json.dump(fixed_mod, fs)
+
+ */
