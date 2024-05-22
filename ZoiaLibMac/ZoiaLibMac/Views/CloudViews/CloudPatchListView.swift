@@ -113,7 +113,10 @@ struct CloudPatchListView: View {
                             }
                         }
                 }
-                Divider()
+				if #unavailable(macOS 13)  {
+					Divider()
+				}
+               
             }
         }
     }

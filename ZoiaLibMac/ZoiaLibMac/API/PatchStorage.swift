@@ -191,7 +191,6 @@ class PatchStorageAPI {
 
     func getZoiaPatchesForPage(page: Int, sortBy: SortByItems, sortOrder: SortOrderItems, pageSize: Int, categories: Set<Int>? = nil, tagsIncluded: Set<Int>? = nil, searchQuery: String? = nil) -> AnyPublisher<[PatchStorage.Patch], Error> {
         
-        //guard let categories = excludeCategories else { return getZoiaPatchesForPage(page: page, sortBy: sortBy, sortOrder: sortOrder, pageSize: pageSize) }
         let categoryList: String? = (categories == nil) || (categories?.isEmpty == true) ? nil : categories?.map{ $0.description }.joined(separator: ",")
         let tagList: String? = (tagsIncluded == nil) || (tagsIncluded?.isEmpty == true) ? nil : tagsIncluded?.map{ $0.description }.joined(separator: ",")
         let request = EndpointFactory.getPageOfPatches(zoiaPlatformId: "3003", sortBy: sortBy, sortOrder: sortOrder, page: page, pageSize: pageSize, categories: categoryList, tagsIncluded: tagList, searchQuery: searchQuery).makeRequest(with: ())!
@@ -214,10 +213,12 @@ class PatchStorageAPI {
                             throw URLError(.badServerResponse)
                         }
         
-                        print("got output") // debug statement
+						// uncomment to see response from server as a string
+						/*
                         if let dataString = String(data: output.data, encoding: .utf8) { // debug statement
                                 print("got dataString: \n\(dataString)") // debug statement
                             } // debug statement
+						*/
                         return output.data
         
                     }
@@ -239,6 +240,8 @@ class PatchStorageAPI {
     }
 }
 
+// How to use .tryMap to get access to response data so it can be converted to a string for debug output
+// Not sure if there is an easier way?
 /*
  //			.tryMap { (output) -> Data in
  //				guard let response = output.response as? HTTPURLResponse else {
@@ -258,43 +261,14 @@ class PatchStorageAPI {
  */
 /*
 
+ /// API Examples
  
  // https://patchstorage.com/api/alpha/platforms/3003
- 
  
  // using Zoia ID, request list of patches
  // https://patchstorage.com/api/alpha/patches?per_page=100&platforms=3003
  
  // get detailed info about a specific patch
  // https://patchstorage.com/api/alpha/patches/150831
- api?.configureTransformer("/platforms") {
-     try jsonDecoder.decode([PatchStoragePlatform].self, from: $0.content)
- }
- 
- api?.configureTransformer("/patches") {
-     try jsonDecoder.decode([PatchStoragePatch].self, from: $0.content)
- }
- 
- api?.configureTransformer("/patches/ *") {
-     try jsonDecoder.decode(PatchStoragePatch.self, from: $0.content)
- }
-}
-
-private func getAllPlatformsResource() -> Resource? {
- return api?.resource("/platforms")
-     .withParam("per_page", "100")
-}
-
-private func getAllPatchesForPlatform(platformId: Int) -> Resource? {
- return api?.resource("/patches")
-     .withParam("per_page", "100")
-     .withParam("platforms", platformId.description)
-}
-
-private func getPatchForPlatform(patchId: Int) -> Resource? {
- return api?.resource("/patches")
-     .child(patchId.description)
-}
- 
 */
 

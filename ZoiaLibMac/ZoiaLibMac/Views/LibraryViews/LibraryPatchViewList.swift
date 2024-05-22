@@ -96,7 +96,9 @@ struct LibraryPatchViewList: View {
                 } label: {
                     LibraryPatchRow(patch: combo, isSelected: false)
                 }
-                Divider()
+				if #unavailable(macOS 13)  {
+					Divider()
+				}
             }
             .onDelete(perform: deleteRows )
             .alert("Confirm Delete", isPresented: $showConfirmPatchDelete, actions: {

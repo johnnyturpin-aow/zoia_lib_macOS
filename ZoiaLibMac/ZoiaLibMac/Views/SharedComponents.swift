@@ -115,7 +115,6 @@ struct PatchCategoryView: View {
                     .lineLimit(1)
             }
         }
-
         
         .frame(width: CloudPatchRow.categoryWidth, height: Layout.rowHeight - 5)
         .background(PatchStorage.colorForCategory(categoryName: patch.mainCategory) ?? (isListStyle ? .gray : .gray))
@@ -124,7 +123,6 @@ struct PatchCategoryView: View {
                     .stroke(AppColors.categoryStroke, lineWidth: 2))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .foregroundStyle(Color.white, Color.init(red: 0.9, green: 0.9, blue: 0.9))
-        
     }
 }
 
@@ -144,7 +142,6 @@ struct PatchDownloadButton: View {
     
     var body: some View {
         VStack {
-           // Spacer()
             HStack {
                 switch patchDownloader.state {
                 case .invalidFile:

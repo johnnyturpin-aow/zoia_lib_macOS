@@ -78,9 +78,8 @@ struct SidebarNavigationView: View {
                     }
                 }
             }
-            Text("Select a menu item")
+            Text("If you see this message, please resize the window to trigger a refresh, as something has gone wrong during initialization.")
                 .ignoresSafeArea()
-                .frame(minWidth: 1200)
             Text("Select an item in the list to the left to display a detailed view")
                 .ignoresSafeArea()
         }
@@ -144,26 +143,6 @@ struct SidebarNavigationView: View {
 
             .help("Drop Patches here from your Library or from .bin files from the Finder")
             .bankDropTarget(bank: bank)
-//            .onDrop(of: ["public.file-url"], isTargeted: Binding(get: { return bank.isTargetedForDrop }, set: {
-//                newValue in
-//                bank.isTargetedForDrop = newValue
-//            }), perform: {
-//                itemProviders in
-//                if let first = itemProviders.first {
-//                    _ = first.loadDataRepresentation(forTypeIdentifier: "public.file-url") {
-//                        data, error in
-//                        if let error = error {
-//                            print(error)
-//                        } else {
-//                            if let data = data, let str = NSString(data: data, encoding: 4), let fileUrl = URL(string: str as String) {
-//                                print("fileURL = \(fileUrl.absoluteString)")
-//                                self.handleDropOfFile(fileUrl: fileUrl, bank: bank)
-//                            }
-//                        }
-//                    }
-//                }
-//                return true
-//            })
             .contextMenu {
                 DuplicateBankButton()
                 Divider()
@@ -172,25 +151,11 @@ struct SidebarNavigationView: View {
                 DeleteBankButton(showDeleteState: $showConfirmDelete)
             }
         }
-//        func handleDropOfFile(fileUrl: URL, bank: Bank) {
-//            
-//            if fileUrl.isDirectory {
-//                print("user has dropped combo directory onto bank")
-//                bank.insertComboDirectoryAsPatch(directoryUrl: fileUrl)
-//            } else {
-//                let fileName = fileUrl.lastPathComponent
-//                let (isZoiaFile, _, _) = BankManager.parseZoiaFileName(filename: fileName)
-//                if isZoiaFile {
-//                    BankManager.insertBinFileAsPatch(bank: bank, fileUrl: fileUrl)
-//                }
-//            }
-//        }
     }
     
     func toggleSidebar() {
         NSApp.sendAction(#selector(NSSplitViewController.toggleSidebar(_:)), to: nil, from: nil)
     }
-    
     
     private var categoriesFilterGroup: some View {
         DisclosureGroup("Categories", isExpanded: $categoryFiltersExpanded) {

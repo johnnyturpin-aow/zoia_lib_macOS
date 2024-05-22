@@ -53,7 +53,6 @@ struct ZoiaLibMacApp: App {
                                       AppearanceOptions() == .Light ? .light : .dark :
                                         customScheme == .Light ? .light : .dark)
         }
-        //.windowToolbarStyle(UnifiedCompactWindowToolbarStyle(showsTitle: true))
         .windowToolbarStyle(.automatic)
         .commands {
             SidebarCommands()
@@ -67,11 +66,6 @@ struct ZoiaLibMacApp: App {
                 .background(Color("nodeViewBackground"))
         }
         .handlesExternalEvents(matching: ["file"])
-        // feels better having these in the toolbar of the NodeView Window
-//        .commands {
-//            NodeViewCommands(layoutAlgorithm: $appModel.nodeViewLayoutAlgorithm)
-//        }
-
     }
 }
 

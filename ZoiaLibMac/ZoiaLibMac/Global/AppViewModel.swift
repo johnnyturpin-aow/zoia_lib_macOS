@@ -120,14 +120,14 @@ class AppViewModel: ObservableObject {
     private(set) var filteredCloudPatchList: Set<PatchStorage.Patch> = [] { didSet { onCloudListChanged() }}
     // sortedCloudPatchList is intermediary of sorted browse list before addition of PatchWrapper
     @Published var sortedCloudPatchList: [PatchStorage.Patch] = []
-    // sortedWrappedPatchList is list used in display of Browse List
+    
     @Published var sortedWrappedPatchList: [PatchWrapper] = []
     @Published var localPatchIdList: Set<String> = []
     private(set) var libraryPatchList: Set<LocalPatchCombo> = [] { didSet { self.sortAndFilterLocalPatchList() }}
     
+	// sortedWrappedPatchList is list used in display of Browse List
     @Published var sortedLocalPatchList: [LocalPatchCombo] = []
     @Published var banks: [Bank] = []
-    //@Published var factoryBank: Bank?
     @Published var factoryBank: [BankType:Bank] = [:]
     
     // MARK: - Combine management properties
