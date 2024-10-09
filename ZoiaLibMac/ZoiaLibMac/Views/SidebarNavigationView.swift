@@ -80,6 +80,7 @@ struct SidebarNavigationView: View {
             }
             Text("If you see this message, please resize the window to trigger a refresh, as something has gone wrong during initialization.")
                 .ignoresSafeArea()
+				.frame(minWidth: 800)
             Text("Select an item in the list to the left to display a detailed view")
                 .ignoresSafeArea()
         }

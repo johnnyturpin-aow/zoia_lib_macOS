@@ -251,6 +251,11 @@ class AppViewModel: ObservableObject {
     
     func onCloudListChanged() {
         self.sortedCloudPatchList = self.filteredCloudPatchList.sorted()
+		
+//		if selectedBrowsePatchId == nil {
+//			
+//			self.selectedBrowsePatchId = sortedCloudPatchList.first?.id
+//		}
         
         // TODO: we need to find a better way to do this
         self.sortedWrappedPatchList = self.filteredCloudPatchList.map {

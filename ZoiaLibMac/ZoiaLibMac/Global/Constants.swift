@@ -41,13 +41,13 @@ extension View {
         
         self.background(AppColors.groupBackground)
             .clipShape(RoundedRectangle(cornerRadius: radius))
-            .shadow(color: AppColors.shadowColor, radius: 1, x: 0, y: 1)
+            .shadow(color: AppColors.shadowColor, radius: 2, x: 1, y: 1)
     }
     
     func darkGroupBackground(radius: CGFloat) -> some View {
         self.background(AppColors.pageBackground)
             .clipShape(RoundedRectangle(cornerRadius: radius))
-            .shadow(color: AppColors.shadowColor, radius: 1, x: 0, y: 1)
+            .shadow(color: AppColors.shadowColor, radius: 2, x: 1, y: 1)
     }
 }
 

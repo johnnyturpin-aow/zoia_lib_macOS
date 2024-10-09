@@ -103,6 +103,7 @@ struct CloudPatchListView: View {
             ForEach(model.sortedWrappedPatchList) { patch in
                 NavigationLink(tag: patch.patch.id, selection: $model.selectedBrowsePatchId) {
                     CloudPatchDetailView(patch: patch)
+						
                 } label: {
                     CloudPatchRow(patch: patch)
                         .onAppear {
@@ -119,6 +120,12 @@ struct CloudPatchListView: View {
                
             }
         }
+		.onAppear {
+			if model.selectedBrowsePatchId == nil {
+				print("setting selection to first item?")
+				model.selectedBrowsePatchId = model.sortedWrappedPatchList.first?.patch.id
+			}
+		}
     }
 }
 

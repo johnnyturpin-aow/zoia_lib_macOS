@@ -87,17 +87,20 @@ struct CloudPatchDetailView: View {
                 .frame(width: 75)
             }
             .padding(20)
-            .groupStyle(radius: 10)
+			.groupStyle(radius: 10)
+//			.background(AppColors.groupBackground)
+//			.clipShape(RoundedRectangle(cornerRadius: 10))
+//			.shadow(color: .black.opacity(0.5), radius: 4, x: 4, y: 4)
             .padding(.top, 10)
             .padding([.leading, .trailing], Layout.detailViewSideMargin)
             .padding(.bottom, 20)
+			
             ScrollView {
                 Text(patch.patchDetail?.content ?? "")
                     .font(.system(size: 14, weight: .light))
                     .foregroundStyle(.primary)
+					.padding(15)
                     .frame(minWidth: 660, maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                    .padding(10)
-                    .padding(.bottom, 30)
             }
             .groupStyle(radius: 10)
             .padding([.leading, .trailing], Layout.detailViewSideMargin)
