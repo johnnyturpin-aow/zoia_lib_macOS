@@ -8,7 +8,6 @@ import SwiftUI
 
 
 struct Layout {
-    
     static let rowHeight: CGFloat = 64
     static let detailViewSideMargin: CGFloat = 30
 }

@@ -28,6 +28,7 @@
 		102EBDD72832E0480034F23C /* PatchDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102EBDD62832E0480034F23C /* PatchDownloader.swift */; };
 		1040161227ED471E000CB681 /* PatchStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1040161127ED471E000CB681 /* PatchStorage.swift */; };
 		1040161827F02815000CB681 /* PatchStorageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1040161727F02815000CB681 /* PatchStorageModels.swift */; };
+		104205052CBF21D1009935BA /* MigratedSidebarNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104205042CBF21D1009935BA /* MigratedSidebarNavigationView.swift */; };
 		104D181E28258E99002DF9F1 /* module_index_ordered.json in Resources */ = {isa = PBXBuildFile; fileRef = 104D181D28258E99002DF9F1 /* module_index_ordered.json */; };
 		10540BF5284C01B10029A6AE /* AppManagers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10540BF4284C01B10029A6AE /* AppManagers.swift */; };
 		105F100D281E4C080039F141 /* LibraryPatchViewList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F100C281E4C080039F141 /* LibraryPatchViewList.swift */; };
@@ -89,6 +90,7 @@
 		1040161127ED471E000CB681 /* PatchStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchStorage.swift; sourceTree = "<group>"; };
 		1040161527EEB373000CB681 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1040161727F02815000CB681 /* PatchStorageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchStorageModels.swift; sourceTree = "<group>"; };
+		104205042CBF21D1009935BA /* MigratedSidebarNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigratedSidebarNavigationView.swift; sourceTree = "<group>"; };
 		104D181D28258E99002DF9F1 /* module_index_ordered.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = module_index_ordered.json; sourceTree = "<group>"; };
 		10540BF4284C01B10029A6AE /* AppManagers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppManagers.swift; sourceTree = "<group>"; };
 		105F100C281E4C080039F141 /* LibraryPatchViewList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryPatchViewList.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 			children = (
 				106753C627E7C42F00476AC3 /* ContentView.swift */,
 				100D2B25281A183600B5B778 /* SidebarNavigationView.swift */,
+				104205042CBF21D1009935BA /* MigratedSidebarNavigationView.swift */,
 				1011A629281E0D2700A2BF93 /* SharedComponents.swift */,
 				1065A775282C77DB00B47479 /* BanksListView.swift */,
 				1065A779282C92EC00B47479 /* BankRowView.swift */,
@@ -378,6 +381,7 @@
 				1017B04D284182290042A5CC /* Node.swift in Sources */,
 				1017B05228419AC20042A5CC /* NodeCanvasView.swift in Sources */,
 				1065A776282C77DB00B47479 /* BanksListView.swift in Sources */,
+				104205052CBF21D1009935BA /* MigratedSidebarNavigationView.swift in Sources */,
 				105F100D281E4C080039F141 /* LibraryPatchViewList.swift in Sources */,
 				10A3AD8C28499490001E9FEA /* DistributionView.swift in Sources */,
 				1011A624281CCC4E00A2BF93 /* PatchButtonGridView.swift in Sources */,
@@ -546,7 +550,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 404;
+				CURRENT_PROJECT_VERSION = 505;
 				DEVELOPMENT_ASSET_PATHS = "\"ZoiaLibMac/Preview Content\"";
 				DEVELOPMENT_TEAM = R6FVYGV9JW;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -559,7 +563,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alloneword.zoia-lib-mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -577,7 +582,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 404;
+				CURRENT_PROJECT_VERSION = 505;
 				DEVELOPMENT_ASSET_PATHS = "\"ZoiaLibMac/Preview Content\"";
 				DEVELOPMENT_TEAM = R6FVYGV9JW;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -590,7 +595,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alloneword.zoia-lib-mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

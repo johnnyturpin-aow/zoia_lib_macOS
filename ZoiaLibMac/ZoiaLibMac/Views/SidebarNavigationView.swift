@@ -20,71 +20,74 @@ struct SidebarNavigationView: View {
     var sortByItems: [SortByItems] = SortByItems.allCases
     var orderByItems: [SortOrderItems] = SortOrderItems.allCases
 
-    var body: some View {
-        NavigationView {
-            List {
-                Section("PATCHES") {
-                    NavigationLink(tag: NavigationItem.cloud.rawValue, selection: $model.currentSidebarSelection) {
-                        PatchListContainer()
-                            .navigationTitle("Browse")
-                            .navigationSubtitle("patchstorage.com")
-                    } label: {
-                        Label("Browse", systemImage: "square.grid.2x2")
-                    }
-                    
-                    .help("Browses patchstorage.com for Zoia Patches")
-                    NavigationLink(tag: NavigationItem.library.rawValue, selection: $model.currentSidebarSelection) {
-                        LocalPatchContainer()
-                            .navigationTitle("Library")
-                            .navigationSubtitle("Downloaded Patches")
-                    } label: {
-                        Label("Library", systemImage: "folder")
-                    }
-                    .help("Download patches in the Browse tab to your own personal library")
-                    DisclosureGroup(isExpanded: $banksExpanded, content: {
+	var body: some View {
+		NavigationView {
+			List {
+				Section("PATCHES") {
+					NavigationLink(tag: NavigationItem.cloud.rawValue, selection: $model.currentSidebarSelection) {
+						PatchListContainer()
+							.navigationTitle("Browse")
+							.navigationSubtitle("patchstorage.com")
+					} label: {
+						Label("Browse", systemImage: "square.grid.2x2")
+					}
+					.help("Browses patchstorage.com for Zoia Patches")
+					NavigationLink(tag: NavigationItem.library.rawValue, selection: $model.currentSidebarSelection) {
+						LocalPatchContainer()
+							.navigationTitle("Library")
+							.navigationSubtitle("Downloaded Patches")
+					} label: {
+						Label("Library", systemImage: "folder")
+					}
+					.help("Download patches in the Browse tab to your own personal library")
+				}
+				Divider()
+				Section("Banks") { 
+					DisclosureGroup(isExpanded: $banksExpanded, content: {
+						ForEach(model.banks) {
+							bank in
+							let _ = print("Sidebar Bank = \(bank.name)")
+							BankNavigationLink(bank: bank, showConfirmDelete: $showConfirmDelete)
 
-                        ForEach(model.banks) {
-                            bank in
-                            BankNavigationLink(bank: bank, showConfirmDelete: $showConfirmDelete)
-                        }
-                        if let zoiaBank = model.factoryBank[.zoia] {
-                            FactoryBankNavigationLink(bank: zoiaBank, showConfirmDelete: $showConfirmDelete)
-                        }
-                        if let zebuBank = model.factoryBank[.euroburo] {
-                            FactoryBankNavigationLink(bank: zebuBank, showConfirmDelete: $showConfirmDelete)
-                        }
-                        
-                    }, label: {
-                        BanksSectionHeader(icon: "list.number", title: "Banks", color: .accentColor, addAction: {
-                            self.addNewBank()
-                        }, isEnabled: $banksEnabled)
-
-                    })
-                    .help("Organize your patches into Zoia banks which you can export to you Zoia SD Card or a folder")
-                }
-                Divider()
-                Spacer()
-                Section("FILTERS") {
-                    categoriesFilterGroup
-                    libraryFilterGroup
-                }
-                Divider()
-            }
-            .listStyle(SidebarListStyle())
-            .toolbar {
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button(action: toggleSidebar) {
-                        Image(systemName: "sidebar.left")
-                    }
-                }
-            }
-            Text("If you see this message, please resize the window to trigger a refresh, as something has gone wrong during initialization.")
-                .ignoresSafeArea()
+						}
+						if let zoiaBank = model.factoryBank[.zoia] {
+							let _ = print("ZOIA FactoryBank = \(zoiaBank.name)")
+							FactoryBankNavigationLink(bank: zoiaBank, showConfirmDelete: $showConfirmDelete)
+						}
+						if let zebuBank = model.factoryBank[.euroburo] {
+							let _ = print("zebuBank FactoryBank = \(zebuBank.name)")
+							FactoryBankNavigationLink(bank: zebuBank, showConfirmDelete: $showConfirmDelete)
+						}
+						
+					}, label: {
+						BanksSectionHeader(icon: "list.number", title: "Banks", color: .accentColor, addAction: {
+							self.addNewBank()
+						}, isEnabled: $banksEnabled)
+						.contentShape(Rectangle())
+					})
+				}
+				Spacer()
+				Section("FILTERS") {
+					categoriesFilterGroup
+					libraryFilterGroup
+				}
+				Divider()
+			}
+			.listStyle(SidebarListStyle())
+			.toolbar {
+				ToolbarItemGroup(placement: .primaryAction) {
+					Button(action: toggleSidebar) {
+						Image(systemName: "sidebar.left")
+					}
+				}
+			}
+			Text("If you see this message, please resize the window to trigger a refresh, as something has gone wrong during initialization.")
+				.ignoresSafeArea()
 				.frame(minWidth: 800)
-            Text("Select an item in the list to the left to display a detailed view")
-                .ignoresSafeArea()
-        }
-    }
+			Text("Select an item in the list to the left to display a detailed view")
+				.ignoresSafeArea()
+		}
+	}
     
     struct FactoryBankNavigationLink: View {
         @ObservedObject var bank: Bank
@@ -105,14 +108,6 @@ struct SidebarNavigationView: View {
                             .opacity(0.3)
                     }
                 }
-                .padding(bank.isTargetedForDrop ? 2 : 0)
-                .background(bank.isTargetedForDrop ? Color.init(red: 0.4, green: 0.4, blue: 0.4) : .clear)
-                .cornerRadius(3)
-            }
-            .contextMenu {
-                DuplicateBankButton()
-                Divider()
-                ExportBankButton()
             }
         }
     }
@@ -122,7 +117,9 @@ struct SidebarNavigationView: View {
         @ObservedObject var bank: Bank
         @EnvironmentObject private var model: AppViewModel
         @Binding var showConfirmDelete: Bool
-        
+		@State private var selection: String? = nil
+		@State private var dropSelectionCache: String? = nil
+		
         var body: some View {
             NavigationLink(tag: bank.name, selection: $model.currentSidebarSelection) {
                 BanksListContainer(bank: bank)
@@ -136,10 +133,11 @@ struct SidebarNavigationView: View {
                         Image(systemName: "square.and.arrow.down")
                             .opacity(0.3)
                     }
-                }
-                .padding(bank.isTargetedForDrop ? 2 : 0)
-                .background(bank.isTargetedForDrop ? Color.init(red: 0.4, green: 0.4, blue: 0.4) : .clear)
+				}
+                .padding(bank.isTargetedForDrop ? 3 : 0)
                 .cornerRadius(3)
+				.overlay(RoundedRectangle(cornerRadius: 3)
+					.stroke(bank.isTargetedForDrop ? .white : .clear, lineWidth: 2))
             }
 
             .help("Drop Patches here from your Library or from .bin files from the Finder")
@@ -263,13 +261,15 @@ struct BanksSectionHeader: View {
                 Text(title)
             }
             Spacer()
+
             if model.bankLoadingProgress.isFinished {
-                Button(action: addAction) {
-                    Image(systemName: "plus")
-                        .foregroundColor(.secondary)
-                }
+				Button(action: addAction) {
+					Image(systemName: "plus")
+						.foregroundColor(.secondary)
+				}
             } else {
                 ProgressView()
+					.scaleEffect(0.5)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -312,4 +312,3 @@ struct BankItemDropDelegate: DropDelegate {
         return true
     }
 }
-

@@ -40,7 +40,7 @@ struct LabelOverlay: View {
                     .font(.system(size: 9, weight: .regular))
                     .foregroundColor(Color.white)
                     .padding(5)
-                    
+					.multilineTextAlignment(.center)
                     .background(Color.init(red: 0, green: 0, blue: 0, opacity: 0.3))
                     .clipShape(RoundedRectangle(cornerRadius: 4))
                     .padding(.trailing, CGFloat(labelWidth - 1) * 70)

@@ -16,20 +16,12 @@ struct ZoiaLibMacApp: App {
     @State var customScheme: AppearanceOptions = AppearanceOptions()
     @Environment(\.scenePhase) private var scenePhase
     
-//    @State var minSize:CGSize = {
-//        guard let screen = NSScreen.main?.frame.size
-//        else { return CGSize(width: 1600, height: 1024) }
-//        return CGSize(width: screen.width, height: screen.height)
-//    }()
-    
     var body: some Scene {
         WindowGroup {
             ContentView(showConfirmDelete: $showConfirmBankDelete)
                 .environmentObject(appModel)
-//				.background(Color(white: 0.15))
                 .padding(.bottom, 1)
 				.frame(minWidth: 1280, minHeight: 800)
-                //.frame(width: 1600, height: 1024)
                 .alert(isPresented: $appModel.alerter.isShowingAlert) {
                     appModel.alerter.alert ?? Alert(title: Text(""))
                 }

@@ -125,13 +125,20 @@ class Bank: Identifiable, Hashable, ObservableObject {
         BankManager.saveBank(bank: self)
     }
     
-    func replacePatchWithBlankPatch(at index: Int) {
+    func replacePatchWithBlankPatch(at index: Int, completion: ((Bool)->Void)? = nil) {
         
         if orderedPatches.item(at: index)?.patchType == .blank { return }
-        let newPatch = PatchFile(patchType: .blank)
-        newPatch.targetSlot = index
-        self.orderedPatches[index] = newPatch
-        BankManager.saveBank(bank: self)
+		
+		BankManager.insertBlankFileAsPatch(bank: self, index: index) {
+			result in
+			if result {
+				BankManager.saveBank(bank: self)
+			}
+		}
+//        let newPatch = PatchFile(patchType: .blank)
+//        newPatch.targetSlot = index
+//        self.orderedPatches[index] = newPatch
+//        BankManager.saveBank(bank: self)
         
     }
     

@@ -184,6 +184,72 @@ class BankManager {
         }
     }
     
+	// Note: Completion is called on UI thread
+	static func insertBlankFileAsPatch(bank: Bank, index: Int, completion: ((Bool)->Void)? = nil) {
+		DispatchQueue.global(qos: .background).async {
+			var bundlePath: String?
+			
+			if bank.bankType == .euroburo {
+				bundlePath = Bundle.main.path(forResource: AppFileManager.factoryBlankPatchName, ofType: "bin", inDirectory: "Factory Euroburo")
+			} else {
+				bundlePath = Bundle.main.path(forResource: AppFileManager.factoryBlankPatchName, ofType: "bin", inDirectory: "Factory")
+			}
+			
+			guard let fileURlString = bundlePath else {
+				DispatchQueue.main.async {
+					completion?(false);
+				}
+				return
+			}
+			print("fileURlString = \(fileURlString)")
+			let fileUrl = URL(fileURLWithPath: fileURlString)
+			if let patchFile = PatchFile.createFromBinFile(fileUrl: fileUrl) {
+				do {
+					let banksDirectory = try AppFileManager.banksUrl()
+					guard let bankDirectory = bank.directoryPath else { return }
+					
+					// first, delete any blank file in that slot
+					let allFiles = try FileManager.default.contentsOfDirectory(at: bankDirectory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+					for file in allFiles {
+						let fileName = file.lastPathComponent
+						let (isZoiaFile, index, patchFileName) = BankManager.parseZoiaFileName(filename: fileName)
+						if index == index {
+							if fileName.lowercased().contains("_zoia_.bin") {
+								try FileManager.default.removeItem(at: file)
+							}
+						}
+					}
+					
+					let data = try Data(contentsOf: fileUrl)
+					let fileName = fileUrl.lastPathComponent
+					//let (isZoiaFile, _, patchFileName) = BankManager.parseZoiaFileName(filename: fileName)
+					
+					let newFileName = String(format: "%03d_zoia_", index) + ".bin"
+					let destFile = bankDirectory.appendingPathComponent(newFileName)
+					try data.write(to: destFile)
+					
+					DispatchQueue.main.async {
+						patchFile.targetSlot = index
+						// we have to update this on main thread as it triggers refresh of list
+						bank.orderedPatches[index] = patchFile
+						completion?(true)
+					}
+					
+				} catch {
+					print("something went wrong inserting new binary file into bank")
+					DispatchQueue.main.async {
+						completion?(false)
+					}
+				}
+			} else {
+				DispatchQueue.main.async {
+					completion?(false)
+				}
+			}
+
+		}
+	}
+	
     // Note: Completion is called on UI thread
     static func insertBinFileAsPatch(bank: Bank, fileUrl: URL, completion: ((Bool)->Void)? = nil) {
         DispatchQueue.global(qos: .background).async {
@@ -192,7 +258,11 @@ class BankManager {
                 // first try to find an available index that is empty
                 // if none then find first index that is blank
                 var foundIndex: Int?
-                foundIndex = bank.orderedPatches.firstIndex(where: { $0.patchType == PatchFile.PatchType.empty || $0.patchType == PatchFile.PatchType.blank })
+               // foundIndex = bank.orderedPatches.firstIndex(where: { $0.patchType == PatchFile.PatchType.empty || $0.patchType == PatchFile.PatchType.blank })
+				foundIndex = bank.orderedPatches.firstIndex(where: { $0.patchType == PatchFile.PatchType.empty })
+				if foundIndex == nil {
+					foundIndex = bank.orderedPatches.firstIndex(where: { $0.patchType == PatchFile.PatchType.blank })
+				}
 
                 if let foundIndex = foundIndex, foundIndex < 64 {
                     // copy file to bank folder
@@ -303,21 +373,26 @@ class BankManager {
                     case .empty:
                         continue
                     case .blank:
-                        patchUrl = try AppFileManager.appSupportUrl().appendingPathComponent("_zoia_.bin")
-                        guard let sourceFile = patchUrl else { continue }
-                        guard sourceFile.pathExtension.lowercased() == "bin" else { continue }
-                        data = try Data(contentsOf: sourceFile)
+						if let key = patch.patchNameFromFile {
+							data = loadedPatches[key]
+						}
+						if let data = data {
+							let newFileName = String(format: "%03d_zoia_", patch.targetSlot) + ".bin"
+							let destFile = targetBankDirectory.appendingPathComponent(newFileName)
+							try data.write(to: destFile)
+						}
                     case .user:
                         if let key = patch.patchNameFromFile {
                             data = loadedPatches[key]
                         }
+						// we only support files of the format: XXX_zoia_PatchName.bin
+						if let data = data {
+							let newFileName = String(format: "%03d_zoia_", patch.targetSlot) + (patch.patchNameFromFile ?? ".bin")
+							let destFile = targetBankDirectory.appendingPathComponent(newFileName)
+							try data.write(to: destFile)
+						}
                     }
-                    // we only support files of the format: XXX_zoia_PatchName.bin
-                    if let data = data {
-                        let newFileName = String(format: "%03d_zoia_", patch.targetSlot) + (patch.patchNameFromFile ?? ".bin")
-                        let destFile = targetBankDirectory.appendingPathComponent(newFileName)
-                        try data.write(to: destFile)
-                    }
+
                 }
                 completion?(true)
             }
@@ -373,29 +448,37 @@ class BankManager {
                 for patch in bank.orderedPatches {
                     
                     var data: Data?
-                    switch patch.patchType {
-                        // for now we are not going to turn empty patches into blank patches
-                    case .empty:
-                        continue
-                    case .blank:
-                        patchUrl = try AppFileManager.appSupportUrl().appendingPathComponent("_zoia_.bin")
-                        guard let sourceFile = patchUrl else { continue }
-                        guard sourceFile.pathExtension.lowercased() == "bin" else { continue }
-                        data = try Data(contentsOf: sourceFile)
-                    case .user(let filePath):
+					switch patch.patchType {
+						// for now we are not going to turn empty patches into blank patches
+					case .empty:
+						continue
+					case .blank:
+						if let key = patch.patchNameFromFile {
+							data = loadedPatches[key]
+						}
+						if let data = data {
+							let newFileName = String(format: "%03d_zoia_", patch.targetSlot) + ".bin"
+							let destFile = bankDirectory.appendingPathComponent(newFileName)
+							try data.write(to: destFile)
+						}
+//                        patchUrl = try AppFileManager.appSupportUrl().appendingPathComponent("_zoia_.bin")
+//                        guard let sourceFile = patchUrl else { continue }
+//                        guard sourceFile.pathExtension.lowercased() == "bin" else { continue }
+//                        data = try Data(contentsOf: sourceFile)
+                    case .user:
                         
                         //patchUrl = URL(fileURLWithPath: filePath)
                         if let key = patch.patchNameFromFile {
                             data = loadedPatches[key]
                         }
-                        
+						// we only support files of the format: XXX_zoia_PatchName.bin
+						if let data = data {
+							let newFileName = String(format: "%03d_zoia_", patch.targetSlot) + (patch.patchNameFromFile ?? ".bin")
+							let destFile = bankDirectory.appendingPathComponent(newFileName)
+							try data.write(to: destFile)
+						}
                     }
-                    // we only support files of the format: XXX_zoia_PatchName.bin
-                    if let data = data {
-                        let newFileName = String(format: "%03d_zoia_", patch.targetSlot) + (patch.patchNameFromFile ?? ".bin")
-                        let destFile = bankDirectory.appendingPathComponent(newFileName)
-                        try data.write(to: destFile)
-                    }
+
                 }
                 completion?(true)
             } catch {

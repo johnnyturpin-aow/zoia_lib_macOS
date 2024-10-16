@@ -17,9 +17,9 @@
         "color-space" : "display-p3",
         "components" : {
           "alpha" : "1.000",
-          "blue" : "0.339",
-          "green" : "0.328",
-          "red" : "0.387"
+          "blue" : "0.387",
+          "green" : "0.286",
+          "red" : "0.244"
         }
       },
       "idiom" : "mac"

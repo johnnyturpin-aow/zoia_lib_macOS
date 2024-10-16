@@ -31,6 +31,7 @@ final class AppFileManager {
     private static let factoryBankFolderName = "Factory"
     private static let factoryZebuBankFolderName = "Factory Euroburo"
     private static let editorFolderName = "Editor"
+	static let factoryBlankPatchName = "063_zoia_"
     
     static let bundleExtension = ".zbundle"
     //var patchLibraryUrl: URL?
@@ -78,5 +79,12 @@ final class AppFileManager {
             .appendingPathComponent(AppFileManager.banksFolderName)
             .appendingPathComponent(AppFileManager.factoryZebuBankFolderName)
     }
+//	static func factoryBlankPatch() throws -> URL {
+//		try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+//			.appendingPathComponent(AppFileManager.appFolderName)
+//			.appendingPathComponent(AppFileManager.banksFolderName)
+//			.appendingPathComponent(AppFileManager.factoryZebuBankFolderName)
+//			.appendingPathComponent(AppFileManager.factoryBlankPatchName)
+//	}
 }
 
