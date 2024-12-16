@@ -200,10 +200,10 @@
         "name": "Sequencer",
         "category": "CV",
         "description": "\n            The sequencer allows you to create a number of \"steps\" (1-32) that can be cycled through,\n            and each step can be used to send a CV value out of that tracks output.\n            The sequencer can have up to 8 tracks, each with their own unique output.\n        ",
-        "default_blocks": 6,
+        "default_blocks": 3,
         "min_blocks": 3,
-        "max_blocks": 44,
-        "params": 36,
+        "max_blocks": 42,
+        "params": 34,
         "cpu": 2,
         "blocks": [
             {
@@ -215,21 +215,21 @@
             },
             {
                 "step_2": {
-                    "isDefault": true,
+                    "isDefault": false,
                     "isParam": true,
                     "position": 1
                 }
             },
             {
                 "step_3": {
-                    "isDefault": true,
+                    "isDefault": false,
                     "isParam": true,
                     "position": 2
                 }
             },
             {
                 "step_4": {
-                    "isDefault": true,
+                    "isDefault": false,
                     "isParam": true,
                     "position": 3
                 }
@@ -445,73 +445,59 @@
                 }
             },
             {
-                "key_input_note": {
-                    "isDefault": false,
-                    "isParam": true,
-                    "position": 34
-                }
-            },
-            {
-                "key_input_gate": {
-                    "isDefault": false,
-                    "isParam": true,
-                    "position": 35
-                }
-            },
-            {
                 "out_track_1": {
                     "isDefault": true,
                     "isParam": false,
-                    "position": 36
+                    "position": 34
                 }
             },
             {
                 "out_track_2": {
                     "isDefault": false,
                     "isParam": false,
-                    "position": 37
+                    "position": 35
                 }
             },
             {
                 "out_track_3": {
                     "isDefault": false,
                     "isParam": false,
-                    "position": 38
+                    "position": 36
                 }
             },
             {
                 "out_track_4": {
                     "isDefault": false,
                     "isParam": false,
-                    "position": 39
+                    "position": 37
                 }
             },
             {
                 "out_track_5": {
                     "isDefault": false,
                     "isParam": false,
-                    "position": 40
+                    "position": 38
                 }
             },
             {
                 "out_track_6": {
                     "isDefault": false,
                     "isParam": false,
-                    "position": 41
+                    "position": 39
                 }
             },
             {
                 "out_track_7": {
                     "isDefault": false,
                     "isParam": false,
-                    "position": 42
+                    "position": 40
                 }
             },
             {
                 "out_track_8": {
                     "isDefault": false,
                     "isParam": false,
-                    "position": 43
+                    "position": 41
                 }
             }
         ],
@@ -573,28 +559,7 @@
             {
                 "behavior": [
                     "loop",
-                    "one_shot",
-                    "cv_step"
-                ]
-            },
-            {
-                "key_input": [
-                    "off",
-                    "selected",
-                    "increment",
-                    "active"
-                ]
-            },
-            {
-                "number_of_pages": [
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8
+                    "once"
                 ]
             }
         ]
@@ -8515,200 +8480,6 @@
                 "threshold": [
                     "off",
                     "on"
-                ]
-            }
-        ]
-    },
-    "106": {
-        "name": "Reverse Delay",
-        "category": "Effect",
-        "description": "\n        ",
-        "default_blocks": 6,
-        "min_blocks": 6,
-        "max_blocks": 9,
-        "params": 5,
-        "cpu": 0.1,
-        "blocks": [
-            {
-                "audio_in_L": {
-                    "isDefault": true,
-                    "isParam": false,
-                    "position": 0
-                }
-            },
-            {
-                "audio_in_R": {
-                    "isDefault": false,
-                    "isParam": false,
-                    "position": 1
-                }
-            },
-            {
-                "delay_time": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 2
-                }
-            },
-            {
-                "tap_tempo_in": {
-                    "isDefault": false,
-                    "isParam": true,
-                    "position": 3
-                }
-            },
-            {
-                "tap_ratio": {
-                    "isDefault": false,
-                    "isParam": true,
-                    "position": 4
-                }
-            },
-            {
-                "feedback": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 5
-                }
-            },
-            {
-                "pitch": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 6
-                }
-            },
-            {
-                "mix": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 7
-                }
-            },
-            {
-                "audio_out_L": {
-                    "isDefault": true,
-                    "isParam": false,
-                    "position": 8
-                }
-            },
-            {
-                "audio_out_R": {
-                    "isDefault": false,
-                    "isParam": false,
-                    "position": 9
-                }
-            }
-        ],
-        "options": [
-            {
-                "channels": [
-                    "mono",
-                    "stereo"
-                ]
-            },
-            {
-                "control": [
-                    "rate",
-                    "tap_tempo"
-                ]
-            }
-        ]
-    },
-    "107": {
-        "name": "Univibe",
-        "category": "Effect",
-        "description": "\n        ",
-        "default_blocks": 6,
-        "min_blocks": 6,
-        "max_blocks": 8,
-        "params": 4,
-        "cpu": 0.1,
-        "blocks": [
-            {
-                "audio_in_L": {
-                    "isDefault": true,
-                    "isParam": false,
-                    "position": 0
-                }
-            },
-            {
-                "audio_in_R": {
-                    "isDefault": false,
-                    "isParam": false,
-                    "position": 1
-                }
-            },
-            {
-                "rate": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 2
-                }
-            },
-            {
-                "tap_tempo_in": {
-                    "isDefault": false,
-                    "isParam": true,
-                    "position": 3
-                }
-            },
-            {
-                "direct": {
-                    "isDefault": false,
-                    "isParam": true,
-                    "position": 4
-                }
-            },
-            {
-                "depth": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 5
-                }
-            },
-            {
-                "resonance": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 6
-                }
-            },
-            {
-                "mix": {
-                    "isDefault": true,
-                    "isParam": true,
-                    "position": 7
-                }
-            },
-            {
-                "audio_out_L": {
-                    "isDefault": true,
-                    "isParam": false,
-                    "position": 8
-                }
-            },
-            {
-                "audio_out_R": {
-                    "isDefault": false,
-                    "isParam": false,
-                    "position": 9
-                }
-            }
-        ],
-        "options": [
-            {
-                "channels": [
-                    "1in->1out",
-                    "1in->2out",
-                    "stereo"
-                ]
-            },
-            {
-                "control": [
-                    "rate",
-                    "tap_tempo",
-                    "cv_direct"
                 ]
             }
         ]

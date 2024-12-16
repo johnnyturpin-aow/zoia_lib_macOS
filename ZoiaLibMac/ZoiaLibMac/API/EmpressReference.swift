@@ -21,56 +21,60 @@ typealias ModuleBlock = [String: EmpressReference.Block]
 class EmpressReference {
     
     static let shared = EmpressReference()
-    var factoryReference: [String] = Array(repeating: "", count: 64)
+    //var factoryReference: [String] = Array(repeating: "", count: 64)
     var moduleList: EmpressModuleList = [:]
 
 
-    private func loadFactoryList(completion: @escaping ()->Void) {
-        if let path = Bundle.main.path(forResource: "factory_list", ofType: "json") {
-            do {
-                let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
-                let decoder = JSONDecoder()
-                //self.factoryList = try decoder.decode(FactoryList.self, from: data)
-                let factoryList: FactoryList = try decoder.decode(FactoryList.self, from: data)
-                
-                for item in factoryList.factoryList {
-                    let (_, index, shortName) = BankManager.parseZoiaFileName(filename: item)
-                    // array ordered by slot for fast lookup
-                    if let index = index {
-                        self.factoryReference[index] = shortName ?? ""
-                    }
-                }
-                
-                completion()
-            }
-            catch let error {
-                print(error)
-                completion()
-            }
-        }
-    }
-	
+//    private func loadFactoryList(completion: @escaping ()->Void) {
+//        if let path = Bundle.main.path(forResource: "factory_list", ofType: "json") {
+//            do {
+//                let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
+//                let decoder = JSONDecoder()
+//                //self.factoryList = try decoder.decode(FactoryList.self, from: data)
+//                let factoryList: FactoryList = try decoder.decode(FactoryList.self, from: data)
+//                
+//                for item in factoryList.factoryList {
+//                    let (_, index, shortName) = BankManager.parseZoiaFileName(filename: item)
+//                    // array ordered by slot for fast lookup
+//                    if let index = index {
+//                        self.factoryReference[index] = shortName ?? ""
+//                    }
+//                }
+//                
+//                completion()
+//            }
+//            catch let error {
+//                print(error)
+//                completion()
+//            }
+//        }
+//    }
+//	
 	
 
 	
     func loadModuleList(completion: @escaping ()->Void) {
         
+		DispatchQueue.global(qos: .background).async {
+			if let path = Bundle.main.path(forResource: "module_index_ordered", ofType: "json") {
+				do {
+					let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
+					let decoder = JSONDecoder()
+					self.moduleList = try decoder.decode([String: EmpressReference.Module].self, from: data)
 
-        self.loadFactoryList {
-            if let path = Bundle.main.path(forResource: "module_index_ordered", ofType: "json") {
-                do {
-                    let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped)
-                    let decoder = JSONDecoder()
-                    self.moduleList = try decoder.decode([String: EmpressReference.Module].self, from: data)
-    
-                    completion()
-                }
-                catch let error {
-                    print(error)
-                    completion()
-                }
-            }
-        }
+					DispatchQueue.main.async {
+						completion()
+					}
+					
+				}
+				catch let error {
+					print(error)
+					DispatchQueue.main.async {
+						completion()
+					}				}
+			}
+		}
+
     }
 	
 	struct ModuleIndexModule: Codable {

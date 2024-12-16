@@ -33,6 +33,7 @@ final class PatchFile: Codable {
     var targetSlot: Int = 0
     var patchNameFromFile: String?
     var parsedPatch: ParsedBinaryPatch?
+	var isFactoryPatch: Bool = false
     
     
     var patchFilePath: String? {
@@ -59,19 +60,19 @@ final class PatchFile: Codable {
         self.patchType = patchType
     }
     
-    var isFactoryPatch: Bool {
-        switch patchType {
-        case .user(let filePath):
-            let path = URL(fileURLWithPath: filePath)
-            let filename = path.lastPathComponent
-            let (isZoia, index, shortName) = BankManager.parseZoiaFileName(filename: filename)
-            return EmpressReference.shared.factoryReference.contains(shortName ?? "")
-        case .blank:
-            return false
-        case .empty:
-            return false
-        }
-    }
+//    var isFactoryPatch: Bool {
+//        switch patchType {
+//        case .user(let filePath):
+//            let path = URL(fileURLWithPath: filePath)
+//            let filename = path.lastPathComponent
+//            let (isZoia, index, shortName) = BankManager.parseZoiaFileName(filename: filename)
+//            return EmpressReference.shared.factoryReference.contains(shortName ?? "")
+//        case .blank:
+//            return false
+//        case .empty:
+//            return false
+//        }
+//    }
     
     // Needs to be refactored if ever called on main thread - currently only called on background threads
     static func createFromBinFile(fileUrl: URL) -> PatchFile? {
@@ -452,8 +453,6 @@ struct ParsedBinaryPatch: Identifiable {
             module.color = module.new_color == 0 ? module.old_color : module.new_color
             patch.modules.append(module)
         }
-
-		//print("calculate maxPageNumber = \(patch.maxPageNumber)")
         patch.connections = []
         //# Extract the connection data for each connection in the patch.
         let num_connections = Int(data[curr_step])
@@ -480,7 +479,7 @@ struct ParsedBinaryPatch: Identifiable {
         curr_step += 1
 		
 		// I think this is named pages only
-        let num_pages = Int(data[curr_step])
+        let num_pages = max(Int(data[curr_step]), patch.maxPageNumber)
         for i in 0..<num_pages {
             let page_name_start = (curr_step + 1) * 4
             let page_name_end = ((curr_step + 1) * 4 ) + 16

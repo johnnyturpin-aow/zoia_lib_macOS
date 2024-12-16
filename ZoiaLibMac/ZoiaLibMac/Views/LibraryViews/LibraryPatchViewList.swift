@@ -87,36 +87,44 @@ struct LibraryPatchViewList: View {
     @State var selectedItem: Int?
     
     var body: some View {
-
-        List(selection: $selectedItem) {
-            ForEach(model.sortedLocalPatchList) {
-                combo in
-                NavigationLink(tag: combo.patchJson.id, selection: $model.selectedLocalPatchId) {
-                    LibraryPatchDetailView(patch: combo)
-                } label: {
-                    LibraryPatchRow(patch: combo, isSelected: false)
-                }
-				if #unavailable(macOS 13)  {
-					Divider()
+		
+		if model.sortedLocalPatchList.isEmpty {
+			VStack {
+				Text("Download patches from the Browse tab to add them to your library.")
+			}
+		} else {
+			List(selection: $selectedItem) {
+				ForEach(model.sortedLocalPatchList) {
+					combo in
+					NavigationLink(tag: combo.patchJson.id, selection: $model.selectedLocalPatchId) {
+						LibraryPatchDetailView(patch: combo)
+					} label: {
+						LibraryPatchRow(patch: combo, isSelected: false)
+					}
+					if #unavailable(macOS 13)  {
+						Divider()
+					}
 				}
-            }
-            .onDelete(perform: deleteRows )
-            .alert("Confirm Delete", isPresented: $showConfirmPatchDelete, actions: {
-                Button(role: .destructive) {
-                    model.deletePatch(patch: model.selectedPatchForDelete)
-                } label: {
-                    Text("Delete")
-                }
-            }, message: {
-                Text("Are your sure your would like to delete: \(model.selectedPatchForDelete?.patchJson.title ?? "")?")
-            })
-        }
-        .onDeleteCommand(perform: {
-            if let patchToDelete = model.sortedLocalPatchList.first(where: { $0.patchJson.id == selectedItem }) {
-                model.selectedPatchForDelete = patchToDelete
-                showConfirmPatchDelete = true
-            }
-        })
+				.onDelete(perform: deleteRows )
+				.alert("Confirm Delete", isPresented: $showConfirmPatchDelete, actions: {
+					Button(role: .destructive) {
+						model.deletePatch(patch: model.selectedPatchForDelete)
+					} label: {
+						Text("Delete")
+					}
+				}, message: {
+					Text("Are your sure your would like to delete: \(model.selectedPatchForDelete?.patchJson.title ?? "")?")
+				})
+			}
+			.onDeleteCommand(perform: {
+				if let patchToDelete = model.sortedLocalPatchList.first(where: { $0.patchJson.id == selectedItem }) {
+					model.selectedPatchForDelete = patchToDelete
+					showConfirmPatchDelete = true
+				}
+			})
+		}
+
+
     }
     
     func deleteRows(at offsets: IndexSet) {

@@ -104,5 +104,7 @@
     "case: sampler = 102",
     "case: device_control = 103",
     "case: cv_mixer = 104",
-    "case: logic_gate = 105"
+    "case: logic_gate = 105",
+	"case: reverse_delay = 106",
+	"case: univibe = 107"
 ]

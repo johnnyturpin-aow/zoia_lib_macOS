@@ -117,6 +117,8 @@ enum ZoiaModuleProcessor: Int {
     case device_control = 103
     case cv_mixer = 104
 	case logic_gate = 105
+	case reverse_delay = 106
+	case univibe = 107
 
     func calculate_blocks_in_module(module: ParsedBinaryPatch.Module) -> [ModuleBlock] {
         var blocks: [ModuleBlock] = []
@@ -169,6 +171,14 @@ enum ZoiaModuleProcessor: Int {
             default:
                 break
             }
+			
+		// options
+		// [0] = number_of_steps
+		// [1] = num_of_tracks
+		// [2] = restart_jack
+		// [3] = behavior
+		// [4] = key_input
+		// [5] = number_of_pages
             
         case 4: //.sequencer
             blocks = []
@@ -182,10 +192,21 @@ enum ZoiaModuleProcessor: Int {
             if module.options.first(where: { $0.key == "restart_jack" })?.value.asString == "on" {
                 blocks.append(d[33])
             }
+			
+			// updated for firmware 5.x sequencer
+			/*
+			 if opt[4][1] != "off":
+				 blocks.append(d[34])
+				 blocks.append(d[35])
+			 */
+			if module.options.first(where: { $0.key == "key_input" })?.value.asString != "off" {
+				blocks.append(d[34])
+				blocks.append(d[35])
+			}
             
             if let num_of_tracks = module.options.first(where: { $0.key == "number_of_tracks"} )?.value.asInt {
                 for i in 1...num_of_tracks {
-                    blocks.append(d[i + 33])
+                    blocks.append(d[i + 35])
                 }
             }
             
@@ -839,6 +860,7 @@ enum ZoiaModuleProcessor: Int {
 			}
 			blocks.append(d[6])
 			blocks.append(d[7])
+			
 			if module.options.first(where: { $0.key == "cv_outputs" })?.value.asString == "on" {
 				blocks.append(d[8])
 				blocks.append(d[9])
@@ -886,8 +908,83 @@ enum ZoiaModuleProcessor: Int {
 				}
 				blocks.append(d[39])
 			}
+			
+
+		// reverse delay
+			/*
+			 blocks = [d[0]]
+			 if opt[0][1] == "stereo":
+				 blocks.append(d[1])
+			 if opt[1][1] == "rate":
+				 blocks.append(d[2])
+			 else:
+				 blocks.append(d[3])
+				 blocks.append(d[4])
+			 blocks.append(d[5])
+			 blocks.append(d[6])
+			 blocks.append(d[7])
+			 blocks.append(d[8])
+			 if opt[0][1] == "stereo":
+				 blocks.append(d[9])
+			 */
+		case 106:
+			blocks = [d[0]]
+
+			if module.options.first(where: { $0.key == "channels" })?.value.asString == "stereo" {
+				blocks.append(d[1])
+			}
+			if module.options.first(where: { $0.key == "control" })?.value.asString == "rate" {
+				blocks.append(d[2])
+			} else {
+				blocks.append(d[3])
+				blocks.append(d[4])
+			}
+			blocks.append(d[5])
+			blocks.append(d[6])
+			blocks.append(d[7])
+			blocks.append(d[8])
+			if module.options.first(where:  { $0.key == "channels" })?.value.asString == "stereo" {
+				blocks.append(d[9])
+			}
             
-            
+		// Univibe
+		/*
+		 blocks = [d[0]]
+		 if opt[0][1] == "stereo":
+			 blocks.append(d[1])
+		 if opt[1][1] == "rate":
+			 blocks.append(d[2])
+		 elif opt[1][1] == "tap_tempo":
+			 blocks.append(d[3])
+		 else:
+			 blocks.append(d[4])
+		 blocks.append(d[5])
+		 blocks.append(d[6])
+		 blocks.append(d[7])
+		 blocks.append(d[8])
+		 if opt[0][1] != "1in->1out":
+			 blocks.append(d[9])
+		 */
+		case 107:
+			blocks = [d[0]]
+			if module.options.first(where: { $0.key == "channels" })?.value.asString == "stereo" {
+				blocks.append(d[1])
+			}
+			if module.options.first(where: { $0.key == "control" })?.value.asString == "rate" {
+				blocks.append(d[2])
+			} else if module.options.first(where: { $0.key == "control" })?.value.asString == "tap_tempo" {
+				blocks.append(d[3])
+			} else {
+				blocks.append(d[4])
+			}
+			blocks.append(d[5])
+			blocks.append(d[6])
+			blocks.append(d[7])
+			blocks.append(d[8])
+			
+			if module.options.first(where: { $0.key == "channels" })?.value.asString != "1in->1out" {
+				blocks.append(d[9])
+			}
         default:
             blocks = d
             

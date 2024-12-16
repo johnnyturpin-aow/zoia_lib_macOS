@@ -29,7 +29,7 @@ class BankManager {
             if isZebu {
                 bundlePath = Bundle.main.path(forResource: "000_zoia_slightlyrandom", ofType: "bin", inDirectory: "Factory Euroburo")
             } else {
-                bundlePath = Bundle.main.path(forResource: "000_zoia_Duck_Friends", ofType: "bin", inDirectory: "Factory")
+                bundlePath = Bundle.main.path(forResource: "000_zoia_Loop_Forest", ofType: "bin", inDirectory: "Factory")
             }
             guard let tempPath = bundlePath else { completion(); return }
             let url = URL(fileURLWithPath: tempPath)
@@ -537,6 +537,8 @@ class BankManager {
                 let jsonDecoder = JSONDecoder()
                 let fileList = try FileManager.default.contentsOfDirectory(at: bankUrl, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
                 
+				let isFactoryPatch = bankUrl.lastPathComponent.prefix(7) == "Factory"
+			
                 if let metadataPath = fileList.first(where: { $0.pathExtension.lowercased() == "json" }) {
                     let jsonData = try Data(contentsOf: metadataPath)
                     let bankMetadata = try jsonDecoder.decode(BankMetadata.self, from: jsonData)
@@ -568,6 +570,7 @@ class BankManager {
                         if isZoiaFile, let index = index {
                             if let patch = PatchFile.createFromBinFile(fileUrl: file) {
                                 patch.targetSlot = index
+								patch.isFactoryPatch = isFactoryPatch
                                 newBank.orderedPatches[index] = patch
                             }
                         }

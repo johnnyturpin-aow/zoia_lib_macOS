@@ -18,7 +18,17 @@ struct BankRowView: View {
                 .foregroundColor(Color.init(red: 0.5, green: 0.5, blue: 0.5))
                 .frame(width: 30)
                 .padding(.leading, 10)
-            
+			
+			Image(systemName: "line.3.horizontal")
+				.resizable()
+				.aspectRatio(contentMode: .fit)
+				.frame(width: 30)
+				.opacity(0.7)
+				.padding([.top, .bottom], 3)
+				.padding(.leading, 10)
+				.padding(.trailing, 5)
+				.draggablePatch(patch: patch)
+			
             Image(systemName: patch.isFactoryPatch ? "lock" : patch.patchType.iconName)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
