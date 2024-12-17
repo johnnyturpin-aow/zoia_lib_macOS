@@ -142,8 +142,6 @@ class AppViewModel: ObservableObject {
     private var pageSize: Int = 50
     
     init() {
-
-		print("AppViewModel init!")
         allLibraryFilters = LibraryFilterType.allCases.map { $0.rawValue }
         setupInitialAPILoadListeners()
         
@@ -159,23 +157,16 @@ class AppViewModel: ObservableObject {
         }
     }
     
-    
     func setupInitialAPILoadListeners() {
         // setup listener for category list updates
         $categoryList
             .sink {
                 list in
-                print("we got a list of categories...")
                 if list.count == 0 {
-                    print("setting stateOfData to .noNetwork")
-                    //self.stateOfData = .noNetwork
                     self.stateOfData = .noNetwork
-                    
                 } else {
-                    print("setting stateOfData to .hasFullData")
                     self.allCategories = list.map { $0.name ?? "" }
                     self.stateOfData = .hasFullData                }
-                print("category size = \(list.count)")
             }
             .store(in: &startupCancellables)
         
@@ -392,7 +383,6 @@ class AppViewModel: ObservableObject {
     }
     
     func fetchFirstPageOfPatches() {
-        print("fetching first patch of new filter list...")
         self.canLoadNextPage = true
         self.page = 1
         self.unfilteredCloudPatchList = []

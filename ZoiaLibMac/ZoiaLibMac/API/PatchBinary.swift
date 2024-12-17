@@ -10,14 +10,6 @@ import Foundation
 import SwiftUI
 import Combine
 
-extension Data {
-    func toArray<T>(type: T.Type) -> [T] where T: ExpressibleByIntegerLiteral {
-        var array = Array<T>(repeating: 0, count: self.count/MemoryLayout<T>.stride)
-        _ = array.withUnsafeMutableBytes { copyBytes(to: $0) }
-        return array
-    }
-}
-
 final class PatchFile: Codable {
 
     var id: String {
@@ -60,23 +52,9 @@ final class PatchFile: Codable {
         self.patchType = patchType
     }
     
-//    var isFactoryPatch: Bool {
-//        switch patchType {
-//        case .user(let filePath):
-//            let path = URL(fileURLWithPath: filePath)
-//            let filename = path.lastPathComponent
-//            let (isZoia, index, shortName) = BankManager.parseZoiaFileName(filename: filename)
-//            return EmpressReference.shared.factoryReference.contains(shortName ?? "")
-//        case .blank:
-//            return false
-//        case .empty:
-//            return false
-//        }
-//    }
     
-    // Needs to be refactored if ever called on main thread - currently only called on background threads
+    // NOTE: Needs to be refactored if ever called on main thread - currently only called on background threads
     static func createFromBinFile(fileUrl: URL) -> PatchFile? {
-
         do {
             let fullFileName = fileUrl.lastPathComponent
             let (isZoiaFile, _, namePart) = BankManager.parseZoiaFileName(filename: fullFileName)
@@ -116,10 +94,9 @@ final class PatchFile: Codable {
     
     var patchTypeDescription: String {
         switch self.patchType {
-            
-        case .blank: return "Blank"
-        case .empty: return "Nothing Assigned"
-        case .user: return "User"
+			case .blank: return "Blank"
+			case .empty: return "Nothing Assigned"
+			case .user: return "User"
         }
     }
 
@@ -256,7 +233,6 @@ struct ParsedBinaryPatch: Identifiable {
             return ""
         }
         
-
         var audio_output_list: [Int: Bool] =  [1:false, 2:false]
         var audio_input_list: [Int: Bool] = [1:false, 2:false]
         
@@ -283,7 +259,6 @@ struct ParsedBinaryPatch: Identifiable {
             return false
         }
         var estimated_cpu: String = ""
-        
         var midi_input_description: String {
             var items: [String] = []
             if self.midi_input_list[1] == true { items.append("NOTE") }
@@ -324,13 +299,11 @@ struct ParsedBinaryPatch: Identifiable {
     static func parseBinaryPatchData(raw: Data) -> ParsedBinaryPatch? {
         
         var patch = ParsedBinaryPatch()
-        
         let referenceModules = EmpressReference.shared.moduleList
-        
         let bytes = [UInt8](raw)
         
         // since there is no easy way to determine if this is indeed a zoia patch
-        // sanity check #1
+        // sanity check is the first thing we do
         if bytes.count != 32768 { return nil }
         
         //# Extract the string name of the patch.
@@ -338,17 +311,16 @@ struct ParsedBinaryPatch: Identifiable {
         patch.name = name ?? ""
 
         //# Unpack the binary data.
-        // data = struct.unpack("i" * int(len(byt) / 4), byt)
+        // python code: data = struct.unpack("i" * int(len(byt) / 4), byt)
         let data = raw.withUnsafeBytes{ Array($0.bindMemory(to: UInt32.self))}  // alternate using extension: let data = raw.toArray(type: UInt32.self)
-        // pch_size = data[0]
         let pch_size = data[0]
         
         patch.size = pch_size
 
 
-        //# Get a list of colors for the modules
-        //# (appears at the end of the binary)
-        // temp = [i for i, e in enumerate(data) if e != 0]
+        // Get a list of colors for the modules
+        // (appears at the end of the binary)
+        // python: temp = [i for i, e in enumerate(data) if e != 0]
         let temp = data.enumerated().filter( { i,e in e != 0 }).map({ i,e in i } )
                 
         let last_color = (temp.last ?? 0) + 1
@@ -374,7 +346,6 @@ struct ParsedBinaryPatch: Identifiable {
         var curr_step = 6
 		patch.maxPageNumber = 0
 		
-
         for i in 0..<num_modules {
             let size = data[curr_step]
             var module = ParsedBinaryPatch.Module()
@@ -402,7 +373,6 @@ struct ParsedBinaryPatch: Identifiable {
                 module.name = EmpressReference.shared.moduleList[module.ref_mod_idx.description]?.name ?? ""
             }
 
-            
             let pos_start = Int(data[curr_step + 5])
             let pos_end = pos_start + (refModule?.min_blocks ?? 0)
             
@@ -461,14 +431,7 @@ struct ParsedBinaryPatch: Identifiable {
             let s2 = Int(data[curr_step + 2])
             let d1 = Int(data[curr_step + 3])
             let d2 = Int(data[curr_step + 4])
-            
-//            if patch.name.lowercased().contains("chipm") == true  {
-//                if d1 == 31 || d1 == 35 || d1 == 38 {
-//
-//                    print("connection src_mod_idx = \(s1), dst_mod_idx = \(d1)")
-//                    //print("check here")
-//                }
-//            }
+
             let strength = Double(Int(data[curr_step + 5]) / 100)
             let connection = ParsedBinaryPatch.ConnectionRaw(source: [s1,s2], destination: [d1,d2], strength: strength)
             patch.connections.append(connection)
@@ -478,7 +441,14 @@ struct ParsedBinaryPatch: Identifiable {
         patch.pages = []
         curr_step += 1
 		
-		// I think this is named pages only
+		// parsing notes:
+		// A ZOIA patch has 128 pages - but a page may not be used and we don't really want to display unused pages
+		// So the strategy is to find the maximum page # referenced by either a module or the page name list
+		// and use that value to determine the total number of pages used by a patch
+		
+		
+		// data[curr_step] here reads the # of named pages stored in the patch
+		// which may be less than the total # of pages used if the creator did not name all of the pages used
         let num_pages = max(Int(data[curr_step]), patch.maxPageNumber)
         for i in 0..<num_pages {
             let page_name_start = (curr_step + 1) * 4
@@ -502,11 +472,9 @@ struct ParsedBinaryPatch: Identifiable {
 
         curr_step += 1
         let num_starred = Int(data[curr_step])
-        
         for _ in 0..<num_starred {
             curr_step += 1
         }
-        
         
         //# Extract the colors of each module in the patch.
         // clear out colors list previously built? why?
@@ -542,12 +510,11 @@ struct ParsedBinaryPatch: Identifiable {
 
         // TODO: need to clean this up - not necessary to repeat in multiple places
         patch.patch_io.estimated_cpu = patch.estimated_cpu_str
-
-        
+		
         patch.modules = ParsedBinaryPatch.create_io_blocks(patch: patch)
         patch.blockConnections = ParsedBinaryPatch.make_block_connections(patch: patch)
         
-		
+		// now parse the modules as laid out in each page
         for module in patch.modules {
             // only update buttons for modules in actual pages - some patches have modules in page 127??? - see Spectre
             if module.pageNumber < patch.pages.count {
@@ -895,41 +862,3 @@ struct ByteParser {
 
 
 
-/*
- #     print("loading ModuleIndex.json")
- #     module_iterator = mod.copy()
- #
- #     all_modules = []
- #     for index in module_iterator:
- #         module = module_iterator[index]
- #         # label = {index: module["name"]}
- #         module_name = module["name"].lower().replace(" ", "_")
- #         label = 'case: {} = {}'.format(module_name, index)
- #         all_modules.append(label)
- #
- # # with open('/Users/jturpin/Library/Application Support/ZoiaLib/all_modules.json', 'w') as fs:
- # with open('all_modules.json', 'w') as fs:
- #     json.dump(all_modules, fs)
- #
- #     fixed_mod = mod.copy()
- #
- #     # loop over all root level objects (these are modules referenced using a string name - which is their index)
- #     # for each module, convert the options dictionary into an ordered array
- #     for index in fixed_mod:
- #         ordered_options = []
- #         module = fixed_mod[index]
- #         opts = module["options"]
- #         for opt_name, opt_value in opts.items():
- #             ordered_options.append({opt_name: opt_value})
- #         module["options"] = ordered_options
- #
- #         ordered_blocks = []
- #         blocks = module["blocks"]
- #         for block_name, block_value in blocks.items():
- #             ordered_blocks.append({block_name: block_value})
- #         module["blocks"] = ordered_blocks
- #
- # with open('module_index.json', 'w') as fs:
- #     json.dump(fixed_mod, fs)
-
- */

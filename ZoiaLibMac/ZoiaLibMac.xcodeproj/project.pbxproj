@@ -26,6 +26,7 @@
 		102EBDD3282DD7430034F23C /* BankPatchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102EBDD2282DD7430034F23C /* BankPatchDetailView.swift */; };
 		102EBDD528303C600034F23C /* BankHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102EBDD428303C600034F23C /* BankHeaderView.swift */; };
 		102EBDD72832E0480034F23C /* PatchDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102EBDD62832E0480034F23C /* PatchDownloader.swift */; };
+		103092502D11C6AA0002C08A /* NodeCanvasTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1030924F2D11C6AA0002C08A /* NodeCanvasTypes.swift */; };
 		1040161227ED471E000CB681 /* PatchStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1040161127ED471E000CB681 /* PatchStorage.swift */; };
 		1040161827F02815000CB681 /* PatchStorageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1040161727F02815000CB681 /* PatchStorageModels.swift */; };
 		104205052CBF21D1009935BA /* MigratedSidebarNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104205042CBF21D1009935BA /* MigratedSidebarNavigationView.swift */; };
@@ -87,6 +88,8 @@
 		102EBDD2282DD7430034F23C /* BankPatchDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankPatchDetailView.swift; sourceTree = "<group>"; };
 		102EBDD428303C600034F23C /* BankHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankHeaderView.swift; sourceTree = "<group>"; };
 		102EBDD62832E0480034F23C /* PatchDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchDownloader.swift; sourceTree = "<group>"; };
+		1030924B2D11BC340002C08A /* python_utils_reference.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = python_utils_reference.py; sourceTree = "<group>"; };
+		1030924F2D11C6AA0002C08A /* NodeCanvasTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeCanvasTypes.swift; sourceTree = "<group>"; };
 		1040161127ED471E000CB681 /* PatchStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchStorage.swift; sourceTree = "<group>"; };
 		1040161527EEB373000CB681 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1040161727F02815000CB681 /* PatchStorageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchStorageModels.swift; sourceTree = "<group>"; };
@@ -150,6 +153,7 @@
 				10A3AD87284988E1001E9FEA /* Edge.swift */,
 				1017B04F284182CC0042A5CC /* NodeView.swift */,
 				10A3AD8528498855001E9FEA /* EdgeView.swift */,
+				1030924F2D11C6AA0002C08A /* NodeCanvasTypes.swift */,
 				1017B05528442F370042A5CC /* NodeCanvas.swift */,
 				1017B05128419AC20042A5CC /* NodeCanvasView.swift */,
 				10A3AD8B28499490001E9FEA /* DistributionView.swift */,
@@ -283,6 +287,7 @@
 				1040161127ED471E000CB681 /* PatchStorage.swift */,
 				1040161727F02815000CB681 /* PatchStorageModels.swift */,
 				101F425B281E587E0036165B /* EmpressReference.swift */,
+				1030924B2D11BC340002C08A /* python_utils_reference.py */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -416,6 +421,7 @@
 				10D900CE2804FC700070B116 /* CloudPatchListView.swift in Sources */,
 				101F425C281E587E0036165B /* EmpressReference.swift in Sources */,
 				10BD3E8A2839992600BCECD3 /* AppButtons.swift in Sources */,
+				103092502D11C6AA0002C08A /* NodeCanvasTypes.swift in Sources */,
 				10B5BA6E280769D4001B4203 /* CloudPatchRow.swift in Sources */,
 				1011A620281CA3C600A2BF93 /* CloudPatchDetailView.swift in Sources */,
 				1065A778282C7A1800B47479 /* BanksManager.swift in Sources */,
@@ -564,7 +570,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alloneword.zoia-lib-mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -596,7 +602,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alloneword.zoia-lib-mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
