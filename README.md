@@ -28,7 +28,7 @@ To contribute to the the developers of the original cross-platform version, plea
 
 ## How to Install
 The latest release .dmg installer can be found here:
-[ZoiaLibMac-1.3](https://github.com/johnnyturpin-aow/zoia_lib_macOS/releases/tag/v1.3)
+[ZoiaLibMac-1.6]([https://github.com/johnnyturpin-aow/zoia_lib_macOS/releases/tag/v1.3](https://github.com/johnnyturpin-aow/zoia_lib_macOS/releases/tag/v1.6))
 
 
 
